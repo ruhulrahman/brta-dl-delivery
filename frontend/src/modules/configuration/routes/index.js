@@ -54,10 +54,10 @@ const childRoutes = (prop) => [
     component: () => import('../pages/user-management/user/List.vue')
   },
   {
-    path: 'subscription-plan',
-    name: prop + 'subscription_plan',
+    path: 'delivery',
+    name: prop + 'delivery',
     meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/subscription-plan/List.vue')
+    component: () => import('../pages/delivery/List.vue')
   },
   {
     path: 'change-password',

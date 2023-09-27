@@ -54,12 +54,5 @@ Route::group([
 	    __DIR__.'/api/admin.php'
 	);
 
-    Route::prefix('mobile')->namespace('Mobile')->as('mobile.')->group(
-	    __DIR__.'/api/mobile.php'
-	);
-
-	// Route::get('common-ajax/{name}', [CommonAjaxController::class, 'get'])->name('common-ajax-get');
-	// Route::post('common-ajax/{name}', [CommonAjaxController::class, 'post'])->name('common-ajax-post');
-
 });
 

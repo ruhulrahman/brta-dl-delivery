@@ -9,7 +9,7 @@
         </b-navbar-brand>
         <b-navbar-brand href="javascript:" class="logo-wrapper">
           <img v-if="layout === 'Home'" src="../assets/images/book.png" class="mr-2" width="42" alt="">
-          <span>Welcome to Tax Ebook Admin Panel<span class="sub-brand"></span></span>
+          <span>Welcome to BRTA Driving License Delivery Admin Panel<span class="sub-brand"></span></span>
         </b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -121,8 +121,8 @@
 <script>
 import { EventBus } from '@/EventBusLayout'
 import Sidebar from '../components/Sidebar.vue'
-import ChangePassword from '../modules/designer-service/configuration/pages/security/ChangePassword'
-import Profile from '../modules/designer-service/configuration/pages/security/Profile'
+import ChangePassword from '@/modules/configuration/pages/security/ChangePassword'
+import Profile from '@/modules/configuration/pages/security/Profile'
 // import LangButton from '../components/LangButton.vue'
 export default {
   Name: 'Navbar',

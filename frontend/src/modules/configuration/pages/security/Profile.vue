@@ -11,8 +11,8 @@
               slot-scope="{ valid, errors }"
             >
             <template v-slot:label>
-              <img v-if="currentUploadedPhoto" :src="currentUploadedPhoto" class="mr-2" width="70" alt="Profile Image">
-              <img v-else src="../../../../../assets//images/man.png" class="mr-2" width="70" alt="Profile Image">
+              <img v-if="attachtedFileUrl" :src="attachtedFileUrl" class="mr-2" width="70" alt="Profile Image">
+              <img v-else src="../../../../assets/images/man.png" class="mr-2" width="70" alt="Profile Image">
             </template>
 
             <!-- <input type="file" v-on:change="uploadFile" ref="file"/> -->
@@ -101,7 +101,8 @@ export default {
         phone: '',
         photo: null
       },
-      currentUploadedPhoto: '',
+      attachtedFileUrl: '',
+      attachtedFile: '',
       upload_photo: [],
       errors: [],
       valid: null,
@@ -116,33 +117,28 @@ export default {
   mounted () {
   },
   methods: {
-    // handlePhoto (e) {
-    //   this.fileValidationMsz = ''
-    //   const input = event.target
-    //   const file = input.files[0]
-    //   if (file.size > 1024 * 1024) {
-    //     e.preventDefault()
-    //     this.fileValidationMsz = 'Maximum file size must be 1MB'
-    //   }
-    //   if (input.files && input.files[0]) {
-    //     const reader = new FileReader()
-    //     reader.onload = (e) => {
-    //       this.form.photo = e.target.result
-    //     }
-    //     reader.readAsDataURL(input.files[0])
-    //   } else {
-    //     this.form.photo = ''
-    //   }
-    // },
     onFileChange (event) {
-      this.upload_photo = event.target.files[0]
+      const inputFile = event.target.files[0]
+      const inputFilePath = event.target.value
 
-      var reader = new FileReader()
-      reader.onload = function () {
-        var dataURL = reader.result
-        this.currentUploadedPhoto = dataURL
+      const reader = new FileReader()
+      console.log('inputFile', inputFile)
+      if (inputFile.size < 5242880) {
+        const allowedExtensions = /(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i
+
+        if (!allowedExtensions.exec(inputFilePath)) {
+          this.alert('File type should be jpg/jpeg/png/gif!', 'error')
+          return false
+        }
+
+        reader.onloadend = () => {
+          this.attachtedFileUrl = reader.result
+        }
+        reader.readAsDataURL(inputFile)
+        this.attachtedFile = inputFile
+      } else {
+        this.alert('File size should be maximus 5MB!', 'error')
       }
-      reader.readAsDataURL(this.upload_photo)
     },
     // async uploadFile () {
     //   this.upload_photo = this.$refs.file.files[0]
@@ -174,10 +170,9 @@ export default {
       Object.keys(this.form).map(key => {
         formData.append(key, this.form[key])
       })
-      if (this.upload_photo) {
-        formData.append('photo', this.upload_photo)
+      if (this.attachtedFile) {
+        formData.append('photo', this.attachtedFile)
       }
-      console.log('this.upload_photo', this.upload_photo)
       result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/profile_update_data', formData)
       this.loading = false
       if (result.success) {

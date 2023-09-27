@@ -18,7 +18,7 @@ class AjaxController extends Controller
     {
         $user = Auth::user();
         $data['user'] = $user;
-        $default_per_page = 10;
+        $default_per_page = 50;
         $request = $req;
         $carbon = new Carbon();
 
@@ -402,6 +402,54 @@ class AjaxController extends Controller
                 'success' => true,
                 'message' => 'Data fetched Successfully!',
                 'data' => $collectionArr
+            ], 200);
+
+        } else if ($name == 'get_dl_stock_data_by_search') {
+
+            $query = model('DlStock')::query();
+
+            if($req->reference_number) {
+                $query->where('reference_number', $req->reference_number);
+            }
+
+            if($req->dl_number) {
+                $query->where('dl_number', $req->dl_number);
+            }
+
+            if($req->box_number) {
+                $query->where('box_number', $req->box_number);
+            }
+
+            if($req->name) {
+                $query->whereDate('name', 'LIKE', "%$req->name%");
+            }
+
+            if($req->father_name) {
+                $query->whereDate('father_name', 'LIKE', "%$req->father_name%");
+            }
+
+            if($req->dob) {
+                $query->whereDate('dob', new Carbon($req->dob));
+            }
+
+            if($req->stock_date) {
+                $query->whereDate('stock_date', new Carbon($req->stock_date));
+            }
+
+            if($req->delivery_date) {
+                $query->whereDate('delivery_date', new Carbon($req->delivery_date));
+            }
+
+            if($req->delivered_id) {
+                $query->where('delivered_id', $req->delivered_id);
+            }
+
+            $list = $query->paginate($default_per_page);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'DL data fetched Successfully!',
+                'data' => $list
             ], 200);
         }
 
@@ -1021,6 +1069,171 @@ class AjaxController extends Controller
                     'message' => 'Profile updated successfully!',
                     'authUser' => $authUser
                 ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'store_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'reference_number' => 'required|unique:dl_stocks,reference_number',
+                'box_number' => 'required',
+                // 'dl_number' => 'required|unique:dl_stocks,dl_number',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $model = model('DlStock')::create([
+                    'reference_number' => $req->reference_number,
+                    'dl_number' => $req->dl_number,
+                    'name' => $req->name,
+                    'father_name' => $req->father_name,
+                    'dob' => new Carbon($req->dob),
+                    'blood' => $req->blood,
+                    'box_number' => $req->box_number,
+                    'stock_date' => $req->stock_date ? new Carbon($req->stock_date) : Carbon::now(),
+                    'comment' => $req->comment,
+                    'creator_id' => $user->id,
+                    'created_at' => Carbon::now(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data saved successfully',
+                    'data'  => $model
+                ], 201);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'update_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'reference_number' => 'required|unique:dl_stocks,reference_number,'.$req->id,
+                'box_number' => 'required',
+                // 'dl_number' => 'required|unique:dl_stocks,dl_number,'.$req->id,
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::find($req->id);
+
+                $dlStock->update([
+                    'reference_number' => $req->reference_number,
+                    'dl_number' => $req->dl_number,
+                    'name' => $req->name,
+                    'father_name' => $req->father_name,
+                    'dob' => new Carbon($req->dob),
+                    'blood' => $req->blood,
+                    'box_number' => $req->box_number,
+                    'stock_date' => new Carbon($req->stock_date),
+                    'comment' => $req->comment,
+                    'editor_id' => $user->id,
+                    'updated_at' => Carbon::now(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully',
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'delete_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'id' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::find($req->id);
+
+                if (!$dlStock) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data not found.'
+                    ], 422);
+                }
+
+                $dlStock->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data deleted successfully',
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'deliver_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'id' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::find($req->id);
+
+                $dlStock->update([
+                    'delivery_date' => Carbon::now(),
+                    'comment' => $req->comment,
+                    'delivered_id' => $user->id,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data delivered successfully',
+                    'data'  => $dlStock
+                ], 200);
+
             } catch (\Throwable $th) {
                 return response()->json([
                     'success' => false,

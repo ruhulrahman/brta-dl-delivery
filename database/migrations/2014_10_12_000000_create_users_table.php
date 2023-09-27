@@ -28,7 +28,6 @@ class CreateUsersTable extends Migration
             $table->integer('facebook_id')->nullable();
             $table->integer('apple_id')->nullable();
             $table->string('device_token')->nullable();
-            $table->unsignedInteger('company_id')->nullable();
             $table->unsignedTinyInteger('active')->default(1)->comment('1=active, 0=inactive');
             $table->rememberToken();
             $table->timestamps();

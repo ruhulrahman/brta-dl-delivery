@@ -3,7 +3,7 @@
         <a href="javascript:" class="logo-route">
             <div class="logo-wrapper">
                 <!-- <img src="../assets/images/book.png" class="logo-img" alt=""> -->
-                <h2 class="title">Eduaid</h2>
+                <h2 class="title">BRTA DL Delivery</h2>
             </div>
         </a>
         <div class="sidebar-navigation">
@@ -19,6 +19,14 @@
                                 </svg>
                             </div>
                             Dashboard
+                        </a>
+                    </router-link>
+                </li>
+                <li v-if="has_permission('subscription_plan')">
+                    <router-link to="/delivery">
+                        <a href="">
+                          <i class="ri-building-3-fill pr-2"></i>
+                        Delivery
                         </a>
                     </router-link>
                 </li>
@@ -46,15 +54,7 @@
                         </li>
                     </ul>
                 </li>
-                <!-- <li v-if="has_permission('subscription_plan')">
-                    <router-link to="/subscription-plan">
-                        <a href="">
-                          <i class="ri-building-3-fill pr-2"></i>
-                        Subscription Plan
-                        </a>
-                    </router-link>
-                </li>
-                <li v-if="has_permission('subscriber')">
+                <!-- <li v-if="has_permission('subscriber')">
                   <router-link to="/subscriber">
                     <a href="">
                       <i class="ri-team-fill pr-2"></i>
