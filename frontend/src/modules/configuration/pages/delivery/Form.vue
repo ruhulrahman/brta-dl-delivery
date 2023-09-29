@@ -5,17 +5,17 @@
       <b-form @submit.prevent="handleSubmit(submitData)" @reset.prevent="reset" autocomplete="off">
         <b-row>
           <b-col lg="4" md="4" sm="12" xs="12">
-            <ValidationProvider name="Stock Date" vid="stock_date" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Receive Date" vid="receive_date" rules="required" v-slot="{ errors }">
               <b-form-group
-                label-for="stock_date">
+                label-for="receive_date">
                 <template v-slot:label>
-                  Stock Date
+                  Receive Date
                 </template>
                 <flat-pickr
-                  id="stock_date"
-                  v-model="form.stock_date"
+                  id="receive_date"
+                  v-model="form.receive_date"
                   class="form-control"
-                  placeholder="Select Stock Date"
+                  placeholder="Select Receive Date"
                   :state="errors[0] ? false : (valid ? true : null)"
                   :config="flatPickrConfig"
                 />
@@ -67,6 +67,27 @@
               </b-form-group>
             </ValidationProvider>
           </b-col>
+          <b-col lg="12" md="12" sm="12" xs="12">
+            <ValidationProvider name="Comment" vid="comment" rules="" v-slot="{ errors }">
+              <b-form-group
+                id="comment"
+                label-for="comment"
+              >
+              <template v-slot:label>
+                Comment <span>*</span>
+              </template>
+                <b-form-textarea
+                  id="comment"
+                  v-model="form.comment"
+                  placeholder="Enter Comment...."
+                  :state="errors[0] ? false : (valid ? true : null)"
+                ></b-form-textarea>
+                <div class="invalid-feedback">
+                  {{ errors[0] }}
+                </div>
+              </b-form-group>
+            </ValidationProvider>
+          </b-col>
         </b-row>
         <div class="row mt-3">
           <div class="col-sm-3"></div>
@@ -97,7 +118,7 @@ export default {
     return {
       SaveButton: this.editItem ? 'Update' : 'Save',
       form: {
-        stock_date: 'today',
+        receive_date: 'today',
         reference_number: '',
         box_number: '',
         dl_number: '',
@@ -118,7 +139,7 @@ export default {
   created () {
     if (this.editItem) {
       this.form = JSON.parse(this.editItem)
-      this.form.stock_date = moment(this.editItem.stock_date).format('DD-MM-YYYY')
+      this.form.receive_date = moment(this.editItem.receive_date).format('DD-MM-YYYY')
     }
   },
   methods: {

@@ -54,12 +54,6 @@ const childRoutes = (prop) => [
     component: () => import('../pages/user-management/user/List.vue')
   },
   {
-    path: 'delivery',
-    name: prop + 'delivery',
-    meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/delivery/List.vue')
-  },
-  {
     path: 'change-password',
     name: prop + 'change_password',
     meta: {
@@ -67,6 +61,18 @@ const childRoutes = (prop) => [
       name: 'Editable'
     },
     component: () => import('../pages/security/ChangePassword.vue')
+  },
+  {
+    path: 'delivery',
+    name: prop + 'delivery',
+    meta: { auth: true, name: 'Editable' },
+    component: () => import('../pages/delivery/List.vue')
+  },
+  {
+    path: 'import-dl',
+    name: prop + 'import_dl',
+    meta: { auth: true, name: 'Editable' },
+    component: () => import('../pages/delivery/ImportDrivingLicense.vue')
   }
 ]
 

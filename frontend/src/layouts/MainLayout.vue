@@ -62,4 +62,7 @@ export default {
 .main-wrapper .sidebar-section .sidebar-wrapper .sidebar-navigation > ul {
     margin-bottom: 0px!important;
 }
+.vs__search, .vs__search:focus {
+    font-size: 13px !important;
+}
 </style>

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('dob')->nullable();
             $table->string('blood', 3)->nullable();
             $table->integer('box_number')->nullable();
-            $table->dateTime('stock_date')->nullable();
+            $table->dateTime('receive_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
             $table->string('comment', 255)->nullable();
             $table->integer('creator_id')->nullable();

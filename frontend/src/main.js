@@ -9,11 +9,13 @@ import listMixin from './mixins/list.js'
 import globalMixin from './mixins/global.js'
 import VTooltip from 'v-tooltip'
 import VueQuillEditor from 'vue-quill-editor'
+import vSelect from 'vue-select'
 
 import 'quill/dist/quill.core.css' // import styles
 import 'quill/dist/quill.snow.css' // for snow theme
 import 'quill/dist/quill.bubble.css' // for bubble theme
 
+Vue.component('v-select', vSelect)
 Vue.use(VTooltip)
 
 Vue.mixin(listMixin)

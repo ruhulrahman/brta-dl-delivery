@@ -40,21 +40,20 @@
                       v-model="search.box_number"
                       type="text"
                       placeholder="Enter Box Number"
-                      required
                       ></b-form-input>
                   </b-form-group>
                 </b-col>
                 <b-col sm="12" md="3">
                   <b-form-group
-                      id="stock_date"
-                      label="Stock Date"
-                      label-for="stock_date"
+                      id="receive_date"
+                      label="Receive Date"
+                      label-for="receive_date"
                   >
                       <flat-pickr
-                        id="stock_date"
-                        v-model="search.stock_date"
+                        id="receive_date"
+                        v-model="search.receive_date"
                         class="form-control"
-                        placeholder="Select Stock Date"
+                        placeholder="Select Receive Date"
                         :config="flatPickrConfig"
                       />
                   </b-form-group>
@@ -75,7 +74,21 @@
                   </b-form-group>
                 </b-col>
                 <b-col sm="12" md="3">
-                  <br>
+                  <b-form-group
+                      id="delivered_id"
+                      label="Delivered By"
+                      label-for="delivered_id"
+                  >
+                  <v-select
+                  id="delivered_id"
+                  v-model="search.delivered_id"
+                  :options="userList"
+                  :reduce="item => item.value"
+                  placeholder="Select User"
+                  ></v-select>
+                  </b-form-group>
+                </b-col>
+                <b-col class="text-left mt-3" sm="12" md="3">
                   <b-button type="submit" size="sm" variant="primary" @click="searchData"><i class="ri-search-line"></i> Search</b-button>
                   <b-button size="sm ml-1" variant="danger" @click="clearData"><i class="ri-close-line"></i> Clear</b-button>
                 </b-col>
@@ -88,57 +101,62 @@
     <b-card-title>
       <b-row>
         <b-col>
-          <h4 class="card-title mb-0 pl-0">Dl Stock List By Search</h4>
+          <h4 class="card-title mb-0 pl-0">Total <span class="badge badge-success">44</span> Dl Stock Found By Search</h4>
         </b-col>
         <b-col class="text-right">
+          <router-link to="/import-dl" class="btn btn-success btn-sm mr-2">Import DL</router-link>
           <b-button v-if="has_permission('add_new_subscription_plan')" size="sm" variant="info" @click="openAddNewModal()">Add New<i class="ri-add-fill"></i></b-button>
         </b-col>
       </b-row>
     </b-card-title>
-    <b-row>
-      <b-col>
-        <b-overlay :show="loading">
-          <b-card>
-            <div class="table-wrapper table-responsive">
-              <table class="table table-striped table-hover table-bordered">
-                <thead>
-                  <tr style="font-size: 13px;">
-                    <th scope="col" class="text-center">SL</th>
-                    <th scope="col" class="text-center">Reference</th>
-                    <th scope="col" class="text-center">Box Number</th>
-                    <!-- <th scope="col" class="text-center">Stock Date</th> -->
-                    <th scope="col" class="text-center">Delivery Date</th>
-                    <th scope="col" class="text-center">Comment</th>
-                    <th scope="col" class="text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody v-for="(item, index) in listData" :key="index">
-                  <tr style="font-size: 12px;">
-                    <td scope="row" class="text-center">{{ index + pagination.slOffset }}</td>
-                    <td class="text-center">{{ item.reference_number }}</td>
-                    <td class="text-center">{{ item.box_number }}</td>
-                    <!-- <td class="text-center"><span v-if="item.stock_date" v-html="dDate(item.stock_date)"></span></td> -->
-                    <td class="text-center">
-                      <span v-if="item.delivery_date" v-html="dDate(item.delivery_date)"></span>
-                      <b-form-checkbox v-else @change="deliverDrivingLicense(item)" v-model="item.active" name="check-button" switch>
-                      </b-form-checkbox>
-                    </td>
-                    <td class="text-center">{{ item.comment }}</td>
-                    <td class="text-center">
-                      <a v-tooltip="'Edit'" v-if="has_permission('edit_subscription_plan')" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn edit" @click="editData(item)"><i class="ri-pencil-fill"></i></a>
-                      <a v-tooltip="'Delete'" v-if="has_permission('delete_subscription_plan')" @click="deleteConfirmation(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete"><i class="ri-delete-bin-2-line"></i></a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </b-card>
-        </b-overlay>
-      </b-col>
-    </b-row>
+    <b-overlay :show="loading">
+      <b-card>
+        <!-- <h6 class="mb-0 mt-4 ml-2">Total 4444</h6> -->
+        <div class="table-wrapper table-responsive pt-0 mt-0">
+          <table class="table table-striped table-hover table-bordered">
+            <thead>
+              <tr style="font-size: 13px;">
+                <th scope="col" class="text-center">SL</th>
+                <th scope="col" class="text-center">Reference</th>
+                <th scope="col" class="text-center">Box Number</th>
+                <!-- <th scope="col" class="text-center">Receive Date</th> -->
+                <th scope="col" class="text-center">Delivery Date</th>
+                <th scope="col" class="text-center">Comment</th>
+                <th scope="col" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody v-for="(item, index) in listData" :key="index">
+              <tr style="font-size: 12px;">
+                <td scope="row" class="text-center">{{ index + pagination.slOffset }}</td>
+                <td class="text-center">{{ item.reference_number }}</td>
+                <td class="text-center">{{ item.box_number }}</td>
+                <!-- <td class="text-center"><span v-if="item.receive_date" v-html="dDate(item.receive_date)"></span></td> -->
+                <td class="text-center">
+                  <div v-if="item.delivery_date">
+                    <b v-html="dDate(item.delivery_date)"></b><br/>
+                    Delivered By <span class="badge badge-primary badge-pill" v-if="item.delivered" v-html="item.delivered.name"></span>
+                  </div>
+                  <b-form-checkbox v-tooltip="'Click to Deliver'" v-else @change="deliverDrivingLicense(item)" v-model="item.active" name="check-button" switch>
+                  </b-form-checkbox>
+                </td>
+                <td class="text-center">{{ item.comment }}</td>
+                <td class="text-center">
+                  <a v-tooltip="'View'" v-if="has_permission('edit_subscription_plan')" style="width: 20px !important; height: 19px !important; font-size: 10px;" href="javascript:" class="action-btn active" @click="viewDetails(item)"><i class="ri-eye-fill"></i></a>
+                  <a v-tooltip="'Edit'" v-if="has_permission('edit_subscription_plan')" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn edit" @click="editData(item)"><i class="ri-pencil-fill"></i></a>
+                  <a v-tooltip="'Delete'" v-if="has_permission('delete_subscription_plan')" @click="deleteConfirmation(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete"><i class="ri-delete-bin-2-line"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </b-card>
+    </b-overlay>
   </b-card>
     <b-modal id="modal-1" ref="editModal" size="lg" title="DL Stock" centered :hide-footer="true">
       <Form @loadList="loadData" :editItem="editItem"/>
+    </b-modal>
+    <b-modal id="modal-1" ref="detailsModal" size="lg" title="DL Details Info" centered :hide-footer="true">
+      <Details @loadList="loadData" :editItem="editItem"/>
     </b-modal>
     <!-- pagination -->
     <div class="pagination-wrapper mt-4">
@@ -156,6 +174,7 @@
 
 <script>
 import Form from './Form.vue'
+import Details from './Details.vue'
 import RestApi, { baseURL } from '@/config'
 
 import flatPickr from 'vue-flatpickr-component'
@@ -164,6 +183,7 @@ import 'flatpickr/dist/flatpickr.css'
 export default {
   components: {
     Form,
+    Details,
     flatPickr
   },
   data () {
@@ -171,7 +191,7 @@ export default {
       // pagination
       rows: 100,
       currentPage: 1,
-      // form data
+      userList: [],
       search: {
         reference_number: '',
         dl_number: '',
@@ -179,7 +199,7 @@ export default {
         name: '',
         father_name: '',
         dob: '',
-        stock_date: '',
+        receive_date: '',
         delivery_date: '',
         delivered_id: ''
       },
@@ -195,6 +215,9 @@ export default {
   created () {
     this.loadData()
   },
+  mounted () {
+    this.getActiveUserList()
+  },
   methods: {
     openAddNewModal () {
       this.editItem = ''
@@ -203,6 +226,10 @@ export default {
     editData (item) {
       this.editItem = JSON.stringify(item)
       this.$refs.editModal.show()
+    },
+    viewDetails (item) {
+      this.editItem = JSON.stringify(item)
+      this.$refs.detailsModal.show()
     },
     searchData () {
       this.loadData()
@@ -215,7 +242,7 @@ export default {
         name: '',
         father_name: '',
         dob: '',
-        stock_date: '',
+        receive_date: '',
         delivery_date: '',
         delivered_id: ''
       }
@@ -239,6 +266,12 @@ export default {
         this.loadData()
       }
       this.loading = false
+    },
+    async getActiveUserList () {
+      var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_total_active_user_list')
+      if (result.success) {
+        this.userList = result.data
+      }
     },
     deleteConfirmation (item) {
       this.$swal({

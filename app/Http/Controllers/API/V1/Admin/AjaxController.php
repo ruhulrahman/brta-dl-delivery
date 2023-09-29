@@ -45,29 +45,21 @@ class AjaxController extends Controller
             ], 200);
         } else if ($name == 'get_dashboard_data') {
 
-            $query = model('Invoice')::whereDate('start_date', $req->start_date);
-
             $dashboardData = new \StdClass;
 
-            $dashboardData->total_user = model('User')::where(['active' => 1, 'user_type' => 'app_user'])->count();
-            $dashboardData->total_paid_user = model('UserSubscription')::count();
-            $dashboardData->total_active_paid_user = model('UserSubscription')::where(['active' => 1])->count();
+            $dlStockQuery = model('DlStock')::query();
 
-            $invoiceQuery = model('Invoice')::whereNotNull('payment_invoice_id');
-
-            $invoice_ids_today = (clone $invoiceQuery)->whereDate('created_at', Carbon::now())->pluck('id');
-            $invoice_ids_this_month = (clone $invoiceQuery)->whereMonth('created_at', Carbon::now())
-            ->pluck('id');
-            $invoice_ids_last_6th_month = (clone $invoiceQuery)->whereDate('created_at', '<=', Carbon::now())
-            ->whereDate('created_at', '>=', Carbon::now()->subMonth(6))
-            ->pluck('id');
-            $invoice_ids_this_year = (clone $invoiceQuery)->whereYear('created_at', Carbon::now())->pluck('id');
-
-            $dashboardData->total_earning_today = (clone $invoiceQuery)->whereIn('id', $invoice_ids_today)->sum('payable_amount');
-            $dashboardData->total_earning_this_month = (clone $invoiceQuery)->whereIn('id', $invoice_ids_this_month)->sum('payable_amount');
-            $dashboardData->total_earning_last_6th_month = (clone $invoiceQuery)->whereIn('id', $invoice_ids_last_6th_month)->sum('payable_amount');
-            $dashboardData->total_earning_this_year = (clone $invoiceQuery)->whereIn('id', $invoice_ids_this_year)->sum('payable_amount');
-            $dashboardData->recentCustomers = (clone $invoiceQuery)->with('customer')->latest()->take(5)->get();
+            $dashboardData->received_today = (clone $dlStockQuery)->whereDate('receive_date', Carbon::now())->count();
+            $dashboardData->entry_today = (clone $dlStockQuery)->whereDate('created_at', Carbon::now())->count();
+            $dashboardData->delivered_today = (clone $dlStockQuery)->whereDate('delivery_date', Carbon::now())->count();
+            $dashboardData->delivered_this_month = (clone $dlStockQuery)->whereMonth('delivery_date', Carbon::now())->count();
+            $dashboardData->delivered_last_6th_month = (clone $dlStockQuery)->whereDate('delivery_date', '<=', Carbon::now())
+            ->whereDate('delivery_date', '>=', Carbon::now()->subMonth(6))
+            ->count();
+            $dashboardData->delivered_this_year = (clone $dlStockQuery)->whereYear('delivery_date', Carbon::now())->count();
+            $dashboardData->totol_delivered = (clone $dlStockQuery)->whereNotNull('delivery_date')->count();
+            $dashboardData->totol_un_delivered = (clone $dlStockQuery)->whereNull('delivery_date')->count();
+            $dashboardData->totol_dl = (clone $dlStockQuery)->count();
 
             $dashboardData->currentMonth = (int) date('m');
 
@@ -76,12 +68,9 @@ class AjaxController extends Controller
             $count = 0;
 
             for($i=$dashboardData->currentMonth; $i>=1; $i--){
-                if ($count == 6) {
-                    break;
-                }
-                // $month = new \stdClass;
-                // $month->month_number = $i;
-                // $month->month_name = date('M', mktime(0, 0, 0, $i, 1));
+                // if ($count == 6) {
+                //     break;
+                // }
 
                 $month = [];
                 $month['month_number'] = $i;
@@ -95,19 +84,13 @@ class AjaxController extends Controller
             $array_temp_id = array_column($monthList,'month_number'); // which column needed to be sorted
             array_multisort($array_temp_id, SORT_ASC, $monthList);
 
-            // $dashboardData->months = (clone $invoiceQuery)->select(
-            //     DB::raw("MONTHNAME(created_at) as month_name")
-            // )->whereYear('created_at', date('Y'))
-            // ->groupBy('month_name')
-            // ->get();
-
             $dashboardData->monthList = [];
 
             foreach($monthList as $item) {
                 $data = [];
                 $data['month_number'] = $item['month_number'];
                 $data['month_name'] = $item['month_name'];
-                $data['earning'] = (clone $invoiceQuery)->whereMonth('created_at', $item['month_number'])->sum('payable_amount');
+                $data['earning'] = (clone $dlStockQuery)->whereMonth('delivery_date', $item['month_number'])->count();
                 array_push($dashboardData->monthList, $data);
             }
 
@@ -355,6 +338,33 @@ class AjaxController extends Controller
                 'message' => 'Data fetch Sucessfully!',
                 'data' => $list
             ], 200);
+        } else if ($name == 'get_total_active_user_list') {
+
+            $list = model('User')::with('role')
+                ->where([
+                    'user_type' => 'admin',
+                    'active' => 1,
+                ])->orderBy('name', 'asc')
+                ->get();
+
+            foreach ($list as $item) {
+                $item->value = $item->id;
+                $item->label = $item->name;
+                $item->active = $item->active == 1 ? TRUE : FALSE;
+            }
+
+            if (!$list) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data Not Found!'
+                ], 402);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data fetch Sucessfully!',
+                'data' => $list
+            ], 200);
         } else if ($name == 'get_current_profile_list') {
 
             $user = Auth::user();
@@ -406,7 +416,7 @@ class AjaxController extends Controller
 
         } else if ($name == 'get_dl_stock_data_by_search') {
 
-            $query = model('DlStock')::query();
+            $query = model('DlStock')::with('creator', 'editor', 'delivered');
 
             if($req->reference_number) {
                 $query->where('reference_number', $req->reference_number);
@@ -432,8 +442,8 @@ class AjaxController extends Controller
                 $query->whereDate('dob', new Carbon($req->dob));
             }
 
-            if($req->stock_date) {
-                $query->whereDate('stock_date', new Carbon($req->stock_date));
+            if($req->receive_date) {
+                $query->whereDate('receive_date', new Carbon($req->receive_date));
             }
 
             if($req->delivery_date) {
@@ -1098,10 +1108,10 @@ class AjaxController extends Controller
                     'dl_number' => $req->dl_number,
                     'name' => $req->name,
                     'father_name' => $req->father_name,
-                    'dob' => new Carbon($req->dob),
+                    'dob' => $req->dob ? new Carbon($req->dob) : NULL,
                     'blood' => $req->blood,
                     'box_number' => $req->box_number,
-                    'stock_date' => $req->stock_date ? new Carbon($req->stock_date) : Carbon::now(),
+                    'receive_date' => $req->receive_date ? new Carbon($req->receive_date) : Carbon::now(),
                     'comment' => $req->comment,
                     'creator_id' => $user->id,
                     'created_at' => Carbon::now(),
@@ -1144,10 +1154,10 @@ class AjaxController extends Controller
                     'dl_number' => $req->dl_number,
                     'name' => $req->name,
                     'father_name' => $req->father_name,
-                    'dob' => new Carbon($req->dob),
+                    'dob' => $req->dob ? new Carbon($req->dob) : NULL,
                     'blood' => $req->blood,
                     'box_number' => $req->box_number,
-                    'stock_date' => new Carbon($req->stock_date),
+                    'receive_date' => new Carbon($req->receive_date),
                     'comment' => $req->comment,
                     'editor_id' => $user->id,
                     'updated_at' => Carbon::now(),
@@ -1240,7 +1250,33 @@ class AjaxController extends Controller
                     'message' => $th->getMessage()
                 ], 500);
             }
-        }
+        } elseif($name=="multiple_uni_agent_student_excel_file_import"){
+
+			$validator = Validator::make($req->all(), [
+				'file' => 'required|mimes:xlsx'
+			]);
+
+			if ($validator->fails()) {
+
+				$errors = $validator->errors()->all();
+				return response(['msg' => $errors[0]], 422);
+			}
+
+
+			$file = $req->file('file');
+
+			$uni_agent_student_import = new \App\Imports\UniUclanAgentStudentImport($req->intake_id);
+
+			$uni_agent_student_import->import($file);
+
+			$imported_list = $uni_agent_student_import->getImportedRows();
+
+			return res_msg('Agent student Excel file imported successfully!', 201, [
+				'success' => true,
+				'imported_list' => $imported_list,
+			]);
+
+		}
 
         return response(['msg' => 'Sorry!, found no named argument.'], 403);
     }

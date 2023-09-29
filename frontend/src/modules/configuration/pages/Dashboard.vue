@@ -5,29 +5,64 @@
       <div class="form-wrapper">
         <b-card title="Dashboard">
           <b-card-text>
+            <h5 class="mb-2">Driving License Info</h5>
             <b-row>
               <b-col sm="12" md="3">
                 <div class="mc-report-card p-3 bg-primary text-light">
-                  <p>Earning this Month</p>
-                  <h4>BDT {{ dashboardData.total_earning_this_month }}</h4>
+                  <p>Delivered Today</p>
+                  <h4>{{ dashboardData.delivered_today }}</h4>
+                </div>
+              </b-col>
+              <b-col sm="12" md="3">
+                <div class="mc-report-card p-3 bg-primary text-light">
+                  <p>Delivered this Month</p>
+                  <h4>{{ dashboardData.delivered_this_month }}</h4>
+                </div>
+              </b-col>
+              <b-col sm="12" md="3">
+                <div class="mc-report-card p-3 bg-primary text-light">
+                  <p>Delivered Last 6 Months</p>
+                  <h4>{{ dashboardData.delivered_last_6th_month }}</h4>
+                </div>
+              </b-col>
+              <b-col sm="12" md="3">
+                <div class="mc-report-card p-3 bg-primary text-light">
+                  <p>Delivered this Year</p>
+                  <h4>{{ dashboardData.delivered_this_year }}</h4>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row class="mt-4">
+              <b-col sm="12" md="3">
+                <div class="mc-report-card p-3 bg-primary text-light">
+                  <p>Total Delivered</p>
+                  <h4>{{ dashboardData.totol_delivered }}</h4>
                 </div>
               </b-col>
               <b-col sm="12" md="3">
                 <div class="mc-report-card p-3 bg-warning text-light">
-                  <p>Earnings this Year</p>
-                  <h4>BDT {{ dashboardData.total_earning_this_year }}</h4>
+                  <p>Total Undelivered</p>
+                  <h4>{{ dashboardData.totol_un_delivered }}</h4>
                 </div>
               </b-col>
               <b-col sm="12" md="3">
                 <div class="mc-report-card p-3 bg-success text-light">
-                  <p>Total Users</p>
-                  <h4>{{ dashboardData.total_user }}</h4>
+                  <p>Received Today</p>
+                  <h4>{{ dashboardData.received_today }}</h4>
                 </div>
               </b-col>
               <b-col sm="12" md="3">
                 <div class="mc-report-card p-3 bg-info text-light">
-                  <p>Paid Users</p>
-                  <h4>{{ dashboardData.total_paid_user }}</h4>
+                  <p>Entry Today</p>
+                  <h4>{{ dashboardData.entry_today }}</h4>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row class="mt-4">
+              <b-col sm="12" md="3">
+                <div class="mc-report-card p-3 bg-secondary text-light">
+                  <p>Total Drining License</p>
+                  <h4>{{ dashboardData.totol_dl }}</h4>
                 </div>
               </b-col>
             </b-row>
@@ -38,40 +73,10 @@
           <b-card-text>
               <!-- <img src="@/assets/images/charts.png" class="img-fluid" alt=""> -->
               <b-row>
-                <b-col sm="12" md="6">
+                <b-col sm="12" md="12">
                   <div id="chart">
                     <apexchart ref="earningOverviewChart" type="line" height="350" :options="chartOptions" :series="series"></apexchart>
                   </div>
-                </b-col>
-                <b-col sm="12" md="6">
-                  <b-card class="mt-3">
-                    <h5 style="padding: 8px 4px 4px 19px;">Last 5 Payments</h5>
-                    <div class="table-wrapper table-responsive">
-                      <table class="table table-striped table-hover table-bordered">
-                        <thead>
-                          <tr style="font-size: 13px;">
-                            <th scope="col" class="text-center">SL</th>
-                            <th scope="col" class="text-center">Name</th>
-                            <th scope="col" class="text-center">Date</th>
-                            <th scope="col" class="text-center">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody v-if="dashboardData && dashboardData.recentCustomers.length">
-                          <tr style="font-size: 12px;" v-for="(item, index) in dashboardData.recentCustomers" :key="index">
-                            <th scope="row" class="text-center">{{ index + 1 }}</th>
-                            <td class="text-center">{{ item.customer ? item.customer.name : '' }}</td>
-                            <td class="text-center">{{ dDate(item.created_at) }}</td>
-                            <td class="text-center">{{ item.grand_total }}</td>
-                          </tr>
-                        </tbody>
-                        <tbody v-else>
-                          <tr style="font-size: 12px;">
-                            <th scope="row" colspan="4" class="text-center text-danger">Found no data</th>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </b-card>
                 </b-col>
                 <!-- <b-col sm="12" md="6">
                     <div id="chart">
@@ -122,7 +127,8 @@ export default {
           curve: 'straight'
         },
         title: {
-          text: 'Last 6 Months Earning Overview',
+          // text: 'Last 6 Months Delivery Overview',
+          text: 'Current Year Monthly Delivery Overview',
           align: 'left'
         },
         grid: {
@@ -214,7 +220,7 @@ export default {
     }
   },
   created () {
-    // this.getDashboardData()
+    this.getDashboardData()
   },
   mounted () {
   },
@@ -222,6 +228,7 @@ export default {
     async getDashboardData () {
       this.loading = true
       var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_dashboard_data')
+      this.loading = false
       this.dashboardData = result.data
       if (result.data.monthList.length) {
         const monthNameList = result.data.monthList.map(item => {
@@ -243,14 +250,13 @@ export default {
 
         this.$refs.earningOverviewChart.updateSeries([
           {
-            name: 'Monthly Earning',
+            name: 'Monthly Delivery',
             data: monthlyEarningList
           }
         ])
       }
       console.log('this.chartOptions.xaxis.categories', this.chartOptions.xaxis.categories)
       // this.chartOptions.xaxis.categories = result.data
-      this.loading = false
     }
   }
 }
