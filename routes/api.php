@@ -22,7 +22,7 @@ use App\Http\Controllers\API\UserManagement\PermissionController;
 // });
 
 Route::get('test', function(){
-    return ['msg'=>'Testing book management api'];
+    return ['msg'=>'Testing Driving License Delivery api'];
 });
 
 /** Authentication Routes.... */

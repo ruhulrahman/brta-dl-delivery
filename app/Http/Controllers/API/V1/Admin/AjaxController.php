@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 // use Carbon\Carbon;
@@ -426,8 +427,8 @@ class AjaxController extends Controller
                 $query->where('dl_number', $req->dl_number);
             }
 
-            if($req->box_number) {
-                $query->where('box_number', $req->box_number);
+            if($req->entry_box_number) {
+                $query->where('entry_box_number', $req->entry_box_number);
             }
 
             if($req->name) {
@@ -460,6 +461,15 @@ class AjaxController extends Controller
                 'success' => true,
                 'message' => 'DL data fetched Successfully!',
                 'data' => $list
+            ], 200);
+        } else if ($name == 'get_last_dl_stock_data') {
+
+            $dlStock = model('DlStock')::latest()->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'DL data fetched Successfully!',
+                'data' => $dlStock
             ], 200);
         }
 
@@ -808,11 +818,14 @@ class AjaxController extends Controller
                 ], 500);
             }
         } else if ($name == 'update_user_data') {
+            info($req->all());
 
-            $validate = Validator::make($request->all(), [
+            $id = $req['id'];
+
+            $validate = Validator::make($req->all(), [
                 'name' => 'required',
-                'email' => 'required|unique:users,email,'. $req->id,
-                'phone' => 'required|unique:users,phone,' . $req->id
+                'email' => 'required|email|unique:users,email,'.$id,
+                'phone' => 'required|unique:users,phone,'.$id
                 // 'role_id' => 'required'
             ]);
 
@@ -968,7 +981,7 @@ class AjaxController extends Controller
 
             if (!Hash::check($req->old_password, $user->password)) {
 
-                $errors = new \StdClass;
+                $errors = new \stdClass;
                 $errors->old_password = 'Old Password does not match';
 
                 return response([
@@ -1088,8 +1101,11 @@ class AjaxController extends Controller
         } else if ($name == 'store_dl_stock_data') {
 
             $validate = Validator::make($request->all(), [
+                'serial_number' => 'required',
+                'receive_date' => 'required',
+                'receiving_box_number' => 'required',
                 'reference_number' => 'required|unique:dl_stocks,reference_number',
-                'box_number' => 'required',
+                'entry_box_number' => 'required',
                 // 'dl_number' => 'required|unique:dl_stocks,dl_number',
             ]);
 
@@ -1105,12 +1121,14 @@ class AjaxController extends Controller
 
                 $model = model('DlStock')::create([
                     'reference_number' => $req->reference_number,
+                    'serial_number' => $req->serial_number,
                     'dl_number' => $req->dl_number,
                     'name' => $req->name,
                     'father_name' => $req->father_name,
                     'dob' => $req->dob ? new Carbon($req->dob) : NULL,
                     'blood' => $req->blood,
-                    'box_number' => $req->box_number,
+                    'entry_box_number' => $req->entry_box_number,
+                    'receiving_box_number' => $req->receiving_box_number,
                     'receive_date' => $req->receive_date ? new Carbon($req->receive_date) : Carbon::now(),
                     'comment' => $req->comment,
                     'creator_id' => $user->id,
@@ -1131,9 +1149,15 @@ class AjaxController extends Controller
             }
         } else if ($name == 'update_dl_stock_data') {
 
-            $validate = Validator::make($request->all(), [
-                'reference_number' => 'required|unique:dl_stocks,reference_number,'.$req->id,
-                'box_number' => 'required',
+            // $id = (int) $req['id'];
+
+            $validate = Validator::make($req->all(), [
+                'serial_number' => 'required',
+                'receive_date' => 'required',
+                'receiving_box_number' => 'required',
+                // 'reference_number' => 'required|unique:dl_stocks,reference_number,'.$id,
+                'reference_number' => 'required',
+                'entry_box_number' => 'required',
                 // 'dl_number' => 'required|unique:dl_stocks,dl_number,'.$req->id,
             ]);
 
@@ -1145,18 +1169,35 @@ class AjaxController extends Controller
                 ], 422);
             }
 
+            $dlStockById = model("DlStock")::find($req->id);
+            $dlStockByReference = model("DlStock")::where('reference_number', $req->reference_number)->first();
+
+            if ($dlStockByReference && $dlStockByReference->id != $dlStockById->id) {
+                $errors = new \stdClass;
+                $errors->reference_number = ["The reference number has already been taken."];
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $errors
+                ], 422);
+
+            }
+
             try {
 
                 $dlStock = model('DlStock')::find($req->id);
 
                 $dlStock->update([
                     'reference_number' => $req->reference_number,
+                    'serial_number' => $req->serial_number,
                     'dl_number' => $req->dl_number,
                     'name' => $req->name,
                     'father_name' => $req->father_name,
                     'dob' => $req->dob ? new Carbon($req->dob) : NULL,
                     'blood' => $req->blood,
-                    'box_number' => $req->box_number,
+                    'entry_box_number' => $req->entry_box_number,
+                    'receiving_box_number' => $req->receiving_box_number,
                     'receive_date' => new Carbon($req->receive_date),
                     'comment' => $req->comment,
                     'editor_id' => $user->id,
@@ -1250,31 +1291,96 @@ class AjaxController extends Controller
                     'message' => $th->getMessage()
                 ], 500);
             }
-        } elseif($name=="multiple_uni_agent_student_excel_file_import"){
+        } elseif($name=="multiple_dl_info_excel_file_import"){
 
 			$validator = Validator::make($req->all(), [
-				'file' => 'required|mimes:xlsx'
+				'file' => 'required|mimes:xlx,xls,xlsx'
 			]);
 
 			if ($validator->fails()) {
-
 				$errors = $validator->errors()->all();
 				return response(['msg' => $errors[0]], 422);
 			}
 
 
-			$file = $req->file('file');
+			// $file = $req->file('file');
+			$file = $req['file'];
+            info($req->all());
+            info($file->get());
 
-			$uni_agent_student_import = new \App\Imports\UniUclanAgentStudentImport($req->intake_id);
+			$dl_stock_import = new \App\Imports\DlStockImport();
+			// $dl_stock_import->import(public_path('static/dl_info_upload_file_sample.xlsx'));
+			$dl_stock_import->import($file);
 
-			$uni_agent_student_import->import($file);
+			$imported_list = $dl_stock_import->getImportedRows();
 
-			$imported_list = $uni_agent_student_import->getImportedRows();
-
-			return res_msg('Agent student Excel file imported successfully!', 201, [
+			return res_msg('Dl Stock Excel file imported successfully!', 201, [
 				'success' => true,
 				'imported_list' => $imported_list,
 			]);
+
+		} elseif($name=="mulitiple_dl_stock_store"){
+
+			$validator = Validator::make($req->all(), [
+				'data'=> 'required|array',
+				'data.*.reference_number' => 'required',
+				'data.*.serial_number' => 'required',
+				'data.*.entry_box_number' => 'required',
+				'data.*.receiving_box_number' => 'required',
+			], [
+				'data.*.reference_number.required' => 'Please fill the reference_number field.',
+				'data.*.serial_number.required' => 'Please fill the serial_number field.',
+				'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
+				'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
+			]);
+
+			if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+
+			foreach($req->data as $item){
+                $model = model('DlStock')::create([
+                    'reference_number' => $item['reference_number'],
+                    'serial_number' => $item['serial_number'],
+                    'entry_box_number' => $item['entry_box_number'],
+                    'receiving_box_number' => $item['receiving_box_number'],
+                    'receive_date' => new Carbon($item['receive_date']),
+                    'delivery_date' => new Carbon($item['delivery_date']),
+                    'comment' => $item['comment'],
+                    'creator_id' => $user->id,
+                    'created_at' => Carbon::now(),
+                ]);
+			}
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data uploaded successfully!',
+            ], 200);
+
+		} elseif($name=="check_duplicate_reference_number"){
+
+			$validator = Validator::make($req->all(), [
+				'reference_number' => 'required|unique:dl_stocks,reference_number'
+			]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'No duplicate found!',
+            ], 200);
 
 		}
 

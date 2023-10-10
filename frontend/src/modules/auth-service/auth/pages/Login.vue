@@ -11,7 +11,7 @@
                 <ValidationObserver ref="form" v-slot="{ handleSubmit, reset }">
                 <b-form @submit.prevent="handleSubmit(loginData)" @reset.prevent="reset" autocomplete="off">
                 <!-- <img class="img-fluid d-block mx-auto" width="90" src="@/assets/images/logo.png" alt=""> -->
-                <h6 class="text-center mt-2 mb-4">Tax Ebook</h6>
+                <h6 class="text-center mt-2 mb-4">Driving License Delivery</h6>
                     <b-col lg="12" md="12" sm="12" xs="12">
                       <ValidationProvider name="Identifier" vid="identifier" rules="required" v-slot="{ errors }">
                         <b-form-group

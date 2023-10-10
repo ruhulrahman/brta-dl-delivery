@@ -24,7 +24,7 @@
                                         <b-card>
                                           <b-card-title>Guidelines</b-card-title>
                                           <b-card-body>
-                                            <p class="card-text">1.<a :href="baseUrl + 'static/uni_agent_student_upload_file_sample_v4.xlsx'"> Click here to download the sample excel file</a>.</p>
+                                            <p class="card-text">1.<a :href="baseUrl + 'static/dl_info_upload_file_sample.xlsx'"> Click here to download the sample excel file</a>.</p>
                                             <p class="card-text">2. Please don't remove the header section in the excel.</p>
                                             <p class="card-text">3. The example data is dummy for your understanding. This is just to guide you how to fill up the form. Please remove that example data.</p>
                                             <p class="card-text">4. Please keep the date format as it is in the sample data.</p>
@@ -51,8 +51,9 @@
                                                 v-on:vdropzone-sending="sendingEvent"
                                                 >
                                                 <div class="dropzone-custom-content">
+                                                    <h1 class="dropzone-custom-title text-primary"><i class="ri-upload-2-line"></i></h1>
                                                     <h1 class="dropzone-custom-title text-primary">Click to upload.</h1>
-                                                    <h2 class="dropzone-custom-title text-primary">Maximum 500 rows</h2>
+                                                    <h2 class="dropzone-custom-title text-danger">Maximum 500 rows</h2>
                                                 </div>
                                             </vue-dropzone>
                                       </b-col>
@@ -60,80 +61,57 @@
                                 </div>
                             </div>
                             <div class="card wait_me_to_process" v-show="excelFileImported">
-                                <!-- <div class="card-header">
-                                    <h4 class="card-title">Email already exist</h4>
-                                </div> -->
                                 <div class="card-body">
-                                    <!-- <div v-for="(item, index) in importedList" :key="index">
-                                        <p><span class="badge badge-dark" v-if="item.duplicate_item == 1">{{ item.email }}</span></p>
-                                    </div> -->
-                                    <button @click="remove_and_re_upload()" class="btn btn-danger mb-2">Remove All Data</button>
-
-                                    <button @click="processToUploadData(importedList)" class="btn btn-success mb-2 pull-right">Process To Upload Data</button>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-hover" id="uni_agent_multiple_student_upload">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Banner Code</th>
-                                                    <th>Student ID</th>
-                                                    <th>First Name</th>
-                                                    <th>Last Name</th>
-                                                    <!-- <th>DOB</th> -->
-                                                    <th>Nationality</th>
-                                                    <!-- <th>Subject Name</th> -->
-                                                    <!-- <th>Course Level</th> -->
-                                                    <!-- <th class="text-center">Intake Month</th> -->
-                                                    <!-- <th>Tuition Fee</th> -->
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr v-for="(item, index) in importedList" :key="index">
-                                                    <td v-html="index + 1"></td>
-                                                    <td>
-                                                        <div @click="editData(item)">
-                                                            <span v-html="item.agent_banner_code" class="mr-1"></span>
-                                                            <i v-if="!item.match_agent_banner_code || item.match_agent_banner_code=='0'" class="fa fa-exclamation-triangle text-warning" v-tooltip="'Banner code not match'"></i><br/>
-                                                            <small v-show="item.agent_company_name" v-html="item.agent_company_name" class="mr-1"></small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span @click="editData(item)" v-html="item.student_id" class="mr-1"></span>
-                                                        <i v-if="item.duplicate_student_id == 1" class="fa fa-exclamation-triangle text-warning" v-tooltip="'Duplicate entry'"></i>
-
-                                                        <i v-if="item.invalid_student_id" class="fa fa-exclamation-triangle text-warning" v-tooltip="'Invalid Student ID'"></i>
-
-                                                    </td>
-                                                    <td v-html="item.first_name"></td>
-                                                    <td v-html="item.last_name"></td>
-                                                    <!-- <td>
-                                                        <span v-html="item.email"></span>
-                                                        <i v-if="item.duplicate_item == 1" title="This email already exist!" class="fa fa-clone text-danger ml-1" aria-hidden="true"></i>
-                                                    </td> -->
-                                                    <!-- <td>
-                                                        <span v-if="item.dob" v-html="dDate(item.dob)"></span>
-                                                    </td> -->
-                                                    <td v-html="item.nationality"></td>
-                                                    <!-- <td v-html="item.subject"></td> -->
-                                                    <!-- <td v-html="item.course_level"></td> -->
-                                                    <!-- <td v-html="dDate(item.intake_month, 'MMM  YYYY')"></td> -->
-                                                    <!-- <td class="text-center" v-html="dDate(item.intake_month+'/01/'+item.intake_year, 'MMM  YYYY')"></td> -->
-                                                    <!-- <td v-html="item.tuition_fee"></td> -->
-                                                    <td>
-                                                        <button @click="editData(item)" class="btn btn-outline-info btn-sm mr-1">
-                                                            <i v-tooltip="'Edit'" class="fa fa-pencil" aria-hidden="true"></i>
-                                                        </button>
-                                                        <button @click="deleteItem(index)" class="btn btn-outline-danger btn-sm">
-                                                            <i v-tooltip="'Delete'" class="fa fa-trash" aria-hidden="true"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <!-- <button @click="processToUploadData(importedList)" class="btn btn-success mb-2 pull-right">Process To Upload Data</button> -->
+                                  <div class="row mt-2 mb-2">
+                                    <div class="col-lg-12 text-right">
+                                      <button @click="remove_and_re_upload()" class="btn btn-danger mr-2">Remove All Data</button>
+                                      <button @click="processToUploadData(importedList)" class="btn btn-success mr-2">Process To Upload Data</button>
                                     </div>
+                                  </div>
+                                  <div class="table-responsive">
+                                      <table class="table table-hover" id="uni_agent_multiple_student_upload">
+                                          <thead>
+                                              <tr>
+                                                  <th>SL</th>
+                                                  <th>Reference</th>
+                                                  <th>Entry Box Number</th>
+                                                  <th>Deliver Date</th>
+                                                  <th>Receive</th>
+                                                  <th>Comment</th>
+                                                  <th>Action</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>
+                                              <tr v-for="(item, index) in importedList" :key="index">
+                                                  <!-- <td v-html="index + 1"></td> -->
+                                                  <td v-html="item.serial_number"></td>
+                                                  <td>
+                                                      <div @click="editData(item)">
+                                                          <span v-html="item.reference_number" class="mr-1"></span>
+                                                          <i v-if="item.is_duplicate" v-tooltip="'Duplicate entry'" class="ri-error-warning-fill text-warning"></i>
+                                                      </div>
+                                                  </td>
+                                                  <td>
+                                                      <span v-html="item.entry_box_number" class="mr-1"></span>
+                                                  </td>
+                                                  <td><span v-if="item.delivery_date" v-html="dDate(item.delivery_date)"></span></td>
+                                                  <td>
+                                                    <span v-if="item.delivery_date" v-tooltip="'Receiving date'" v-html="dDate(item.delivery_date)"></span><br/>
+                                                    <span v-if="item.receiving_box_number" v-tooltip="'Receiving box number'" v-html="item.receiving_box_number"></span><br/>
+                                                  </td>
+                                                  <td v-html="item.comment"></td>
+                                                  <td>
+                                                      <button @click="editData(item)" class="btn btn-outline-info btn-sm mr-1">
+                                                          <i v-tooltip="'Edit'" class="ri-pencil-fill"></i>
+                                                      </button>
+                                                      <button @click="deleteItem(index)" class="btn btn-outline-danger btn-sm">
+                                                          <i v-tooltip="'Delete'" class="ri-delete-bin-2-line"></i>
+                                                      </button>
+                                                  </td>
+                                              </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
                                 </div>
                             </div>
                         </div>
@@ -143,6 +121,123 @@
             </div>
       </b-card>
     </b-overlay>
+    <b-modal id="modal-1" ref="editModal" size="xl" title="DL Stock" centered :hide-footer="true">
+      <ValidationObserver ref="form" v-slot="{ handleSubmit, reset }">
+        <b-form @submit.prevent="handleSubmit(submitData)" @reset.prevent="reset" autocomplete="off">
+          <b-row>
+            <b-col lg="4" md="4" sm="12" xs="12">
+              <ValidationProvider name="Serial Number" vid="serial_number" rules="required" v-slot="{ errors }">
+                <b-form-group label-for="serial_number">
+                <template v-slot:label>
+                  Serial Number <span class="text-danger">*</span>
+                  {{ editItem.serial_number }}
+                </template>
+                  <b-form-input
+                    type="number"
+                    id="serial_number"
+                    v-model="editItem.serial_number"
+                    placeholder="Enter Serial Number"
+                    :state="errors[0] ? false : (valid ? true : null)"
+                  ></b-form-input>
+                  <div class="invalid-feedback">
+                    {{ errors[0] }}
+                  </div>
+                </b-form-group>
+              </ValidationProvider>
+            </b-col>
+            <b-col lg="4" md="4" sm="12" xs="12">
+              <ValidationProvider name="Receiving Box Number" vid="receiving_box_number" rules="required" v-slot="{ errors }">
+                <b-form-group label-for="receiving_box_number">
+                <template v-slot:label>
+                  Receiving Box Number <span class="text-danger">*</span>
+                </template>
+                  <b-form-input
+                    id="receiving_box_number"
+                    v-model="editItem.receiving_box_number"
+                    placeholder="Enter Receiving Box Number"
+                    :state="errors[0] ? false : (valid ? true : null)"
+                  ></b-form-input>
+                  <div class="invalid-feedback">
+                    {{ errors[0] }}
+                  </div>
+                </b-form-group>
+              </ValidationProvider>
+            </b-col>
+            <b-col lg="4" md="4" sm="12" xs="12">
+              <ValidationProvider name="Receive Date" vid="receive_date" rules="required" v-slot="{ errors }">
+                <b-form-group
+                  label-for="receive_date">
+                  <template v-slot:label>
+                    Receive Date <span class="text-danger">*</span>
+                  </template>
+                  <flat-pickr
+                    id="receive_date"
+                    v-model="editItem.receive_date"
+                    class="form-control"
+                    placeholder="Select Receive Date"
+                    :state="errors[0] ? false : (valid ? true : null)"
+                    :config="flatPickrConfig"
+                  />
+                  <div class="d-block invalid-feedback">
+                    {{ errors[0] }}
+                  </div>
+                </b-form-group>
+              </ValidationProvider>
+            </b-col>
+            <b-col lg="4" md="4" sm="12" xs="12">
+              <ValidationProvider name="Entry Box Number" vid="entry_box_number" rules="required" v-slot="{ errors }">
+                <b-form-group
+                  id="entry_box_number"
+                  label-for="entry_box_number"
+                >
+                <template v-slot:label>
+                  Entry Box Number <span class="text-danger">*</span>
+                </template>
+                  <b-form-input
+                    id="entry_box_number"
+                    v-model="editItem.entry_box_number"
+                    placeholder="Enter Entry Box Number"
+                    :state="errors[0] ? false : (valid ? true : null)"
+                  ></b-form-input>
+                  <div class="invalid-feedback">
+                    {{ errors[0] }}
+                  </div>
+                </b-form-group>
+              </ValidationProvider>
+            </b-col>
+            <b-col lg="4" md="4" sm="12" xs="12">
+              <ValidationProvider name="Reference Number" vid="reference_number" rules="required" v-slot="{ errors }">
+                <b-form-group
+                  id="reference_number"
+                  label-for="reference_number"
+                >
+                <template v-slot:label>
+                  Reference Number <span class="text-danger">*</span>
+                </template>
+                  <b-form-input
+                    id="reference_number"
+                    v-model="editItem.reference_number"
+                    placeholder="Enter Reference Number"
+                    :state="errors[0] ? false : (valid ? true : null)"
+                  ></b-form-input>
+                  <div class="invalid-feedback">
+                    {{ errors[0] }}
+                  </div>
+                </b-form-group>
+              </ValidationProvider>
+            </b-col>
+          </b-row>
+          <div class="row mt-3">
+            <div class="col-sm-3"></div>
+            <div class="col text-right">
+                <b-button type="submit" variant="primary" class="mr-2">Update</b-button>
+                &nbsp;
+                <b-button variant="danger" class="mr-1" @click="$bvModal.hide('modal-1')">Cancel</b-button>
+            </div>
+          </div>
+        </b-form>
+      </ValidationObserver>
+    </b-modal>
   </div>
 </template>
 
@@ -151,14 +246,16 @@ import RestApi, { baseURL } from '@/config'
 import swal from 'bootstrap-sweetalert'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+// import ImportEditForm from './ImportEditForm.vue'
 
-// import flatPickr from 'vue-flatpickr-component'
-// import 'flatpickr/dist/flatpickr.css'
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
 
 export default {
   components: {
-    vueDropzone: vue2Dropzone
-    // flatPickr
+    vueDropzone: vue2Dropzone,
+    // ImportEditForm,
+    flatPickr
   },
   data () {
     return {
@@ -168,7 +265,9 @@ export default {
       listData: [],
       importedList: [],
       loading: false,
-      editItem: '',
+      editItem: {},
+      errors: [],
+      valid: null,
       flatPickrConfig: {
         dateFormat: 'd-m-Y'
       }
@@ -183,21 +282,22 @@ export default {
     dropzoneOptions: function () {
       var ref = this
       ref.dropzone_configs = {
-        url: baseURL + 'api/v1/admin/ajax/multiple_uni_agent_student_excel_file_import',
+        url: baseURL + 'api/v1/admin/ajax/multiple_dl_info_excel_file_import',
         thumbnailWidth: 200,
         addRemoveLinks: true,
         multipleUpload: false,
         maxFiles: 1,
         acceptedFiles: '.xls,.xlsx',
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('api_token'),
-          'Access-Control-Allow-Origin': '*',
-          Accept: 'application/json'
+          Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+          'Access-Control-Allow-Origin': '*'
+          // 'Content-Type': 'multipart/form-data'
+          // Accept: 'application/json'
         }
       }
     },
     sendingEvent (file, xhr, formData) {
-      // formData.append('intake_id', this.hash_id(this.$route.params.intake_id, false)[0])
+      // formData.append('user_id', 5)
     },
     vsuccess: function (file, response) {
       this.importedList = response.data.imported_list.map((item, index) => {
@@ -208,7 +308,7 @@ export default {
       })
       this.$refs.dl_list_upload_dropzone.removeAllFiles()
       this.excelFileImported = true
-      this.check_duplicate_exists()
+      // this.check_duplicate_exists()
     },
     verror: function (file, response) {
       swal(response.msg, '', 'danger')
@@ -216,73 +316,87 @@ export default {
     clearDropzone: function () {
       this.$refs.dl_list_upload_dropzone.removeAllFiles()
     },
-    check_duplicate_exists: async function () {
-      var ref = this
-      var jq = ref.jq()
-      var url = ref.url('api/v1/admin/ajax/uni_as_upload_unique_check')
-
-      const formData = {
-        list: ref.importedList.map(item => {
-          return {
-            match_agent_banner_code: item.match_agent_banner_code,
-            student_id: item.student_id,
-            duplicate_student_id: item.duplicate_student_id
-          }
-        }),
-        intake_id: ref.hash_id(ref.$route.params.intake_id, false)[0]
-      }
-
-      try {
-        const res = await jq.post(url, formData)
-        ref.importedList = ref.importedList.map(item => {
-          const studentObj = res.data.importedList.find(student => student.student_id === item.student_id)
-
-          if (studentObj) {
-            item.duplicate_student_id = studentObj.duplicate_student_id
-            item.invalid_student_id = studentObj.invalid_student_id
-          }
-
-          return Object.assign(item)
-        })
-        console.log(ref.importedList)
-      } catch (error) {
-        console.log(error)
-      }
-    },
-    async deliverDrivingLicense (item) {
-      this.loading = true
-      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/deliver_dl_stock_data', item)
-      if (result.success) {
-        this.$toast.success({ title: 'Success', message: result.message })
-        this.loadData()
-      }
-      this.loading = false
-    },
-    deleteConfirmation (item) {
+    remove_and_re_upload: function () {
       this.$swal({
-        title: 'Are you sure to delete?',
+        title: 'Are you sure you want to remove the data?',
+        text: 'Press Yes to Confirm or Cancel',
+        type: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes',
         cancelButtonText: 'No',
         focusConfirm: false
       }).then((result) => {
         if (result.isConfirmed) {
-          // declare confirmed method to hit api
-          this.deleteData(item)
+          this.$refs.dl_list_upload_dropzone.removeAllFiles()
+          this.excelFileImported = false
         }
       })
     },
-    async deleteData (item) {
+    deleteItem: function (index) {
+      this.$swal({
+        title: 'Are you sure?',
+        text: 'Press Yes to confirm or Cancel',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        focusConfirm: false
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.importedList.splice(index, 1)
+        }
+      })
+    },
+    editData: function (item) {
+      this.editItem = JSON.parse(JSON.stringify(item))
+      this.$refs.editModal.show()
+    },
+    async submitData () {
       this.loading = true
-      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/delete_dl_stock_data', item)
-      if (result.success) {
-        this.$toast.success({
-          title: 'Success',
-          message: result.message
-        })
-        this.loadData()
-      }
+      const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/check_duplicate_reference_number', this.editItem)
       this.loading = false
+      if (result.success) {
+        const objIndex = this.importedList.findIndex(item => item.index === this.editItem.index)
+        this.importedList[objIndex].reference_number = this.editItem.reference_number
+        this.importedList[objIndex].serial_number = this.editItem.serial_number
+        this.importedList[objIndex].entry_box_number = this.editItem.entry_box_number
+        this.importedList[objIndex].receiving_box_number = this.editItem.receiving_box_number
+        this.importedList[objIndex].delivery_date = this.editItem.delivery_date
+        this.importedList[objIndex].comment = this.editItem.comment
+        this.importedList[objIndex].is_duplicate = false
+
+        this.$bvModal.hide('modal-1')
+      } else {
+        this.$refs.form.setErrors(result.errors)
+      }
+    },
+    processToUploadData: async function (data) {
+      const isDuplicate = data.find(item => item.is_duplicate)
+
+      if (isDuplicate) {
+        this.$toast.error({
+          title: 'Failed',
+          message: 'Please remove or edit duplicate reference before process'
+        })
+      } else {
+        this.loading = true
+        const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/mulitiple_dl_stock_store', { data })
+        this.loading = false
+        if (result.success) {
+          this.importedList = []
+          this.$refs.dl_list_upload_dropzone.removeAllFiles()
+          this.excelFileImported = false
+          this.$toast.success({
+            title: 'Success',
+            message: result.message
+          })
+        } else {
+          this.$toast.error({
+            title: 'Validation Error',
+            message: result.errors
+          })
+        }
+      }
     }
   }
 }

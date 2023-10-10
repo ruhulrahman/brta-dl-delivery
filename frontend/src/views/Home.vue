@@ -12,7 +12,7 @@
                 <b-card class="mc-db-card" @click="goToComp()">
                   <div class="d-flex justify-content-start align-items-center">
                     <img class="mr-2 bms" src="../assets/icons/main-dashboard/bazar-monitoring.png" alt="">
-                    <h5>Book Management</h5>
+                    <h5>Driving License Delivery</h5>
                   </div>
                 </b-card>
             </b-col>

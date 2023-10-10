@@ -31,13 +31,13 @@
                 </b-col>
                 <b-col sm="12" md="3">
                   <b-form-group
-                      id="box_number"
+                      id="entry_box_number"
                       label="Box Number"
-                      label-for="box_number"
+                      label-for="entry_box_number"
                   >
                       <b-form-input
-                      id="box_number"
-                      v-model="search.box_number"
+                      id="entry_box_number"
+                      v-model="search.entry_box_number"
                       type="text"
                       placeholder="Enter Box Number"
                       ></b-form-input>
@@ -101,10 +101,10 @@
     <b-card-title>
       <b-row>
         <b-col>
-          <h4 class="card-title mb-0 pl-0">Total <span class="badge badge-success">44</span> Dl Stock Found By Search</h4>
+          <h4 class="card-title mb-0 pl-0">Total <span class="badge badge-success">{{ totalRowCount }}</span> Dl Stock Found By Search</h4>
         </b-col>
         <b-col class="text-right">
-          <router-link to="/import-dl" class="btn btn-success btn-sm mr-2">Import DL</router-link>
+          <router-link to="/import-dl" class="btn btn-success btn-sm mr-2">Import DL <i class="ri-upload-line"></i></router-link>
           <b-button v-if="has_permission('add_new_subscription_plan')" size="sm" variant="info" @click="openAddNewModal()">Add New<i class="ri-add-fill"></i></b-button>
         </b-col>
       </b-row>
@@ -116,9 +116,9 @@
           <table class="table table-striped table-hover table-bordered">
             <thead>
               <tr style="font-size: 13px;">
-                <th scope="col" class="text-center">SL</th>
                 <th scope="col" class="text-center">Reference</th>
                 <th scope="col" class="text-center">Box Number</th>
+                <th scope="col" class="text-center">Serial Number</th>
                 <!-- <th scope="col" class="text-center">Receive Date</th> -->
                 <th scope="col" class="text-center">Delivery Date</th>
                 <th scope="col" class="text-center">Comment</th>
@@ -127,9 +127,10 @@
             </thead>
             <tbody v-for="(item, index) in listData" :key="index">
               <tr style="font-size: 12px;">
-                <td scope="row" class="text-center">{{ index + pagination.slOffset }}</td>
+                <!-- <td scope="row" class="text-center">{{ index + pagination.slOffset }}</td> -->
                 <td class="text-center">{{ item.reference_number }}</td>
-                <td class="text-center">{{ item.box_number }}</td>
+                <td class="text-center">{{ item.entry_box_number }}</td>
+                <td scope="row" class="text-center">{{ item.serial_number }}</td>
                 <!-- <td class="text-center"><span v-if="item.receive_date" v-html="dDate(item.receive_date)"></span></td> -->
                 <td class="text-center">
                   <div v-if="item.delivery_date">
@@ -143,7 +144,7 @@
                 <td class="text-center">
                   <a v-tooltip="'View'" v-if="has_permission('edit_subscription_plan')" style="width: 20px !important; height: 19px !important; font-size: 10px;" href="javascript:" class="action-btn active" @click="viewDetails(item)"><i class="ri-eye-fill"></i></a>
                   <a v-tooltip="'Edit'" v-if="has_permission('edit_subscription_plan')" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn edit" @click="editData(item)"><i class="ri-pencil-fill"></i></a>
-                  <a v-tooltip="'Delete'" v-if="has_permission('delete_subscription_plan')" @click="deleteConfirmation(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete"><i class="ri-delete-bin-2-line"></i></a>
+                  <a v-tooltip="'Delete'" v-if="has_permission('delete_subscription_plan')" @click="deleteData(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete"><i class="ri-delete-bin-2-line"></i></a>
                 </td>
               </tr>
             </tbody>
@@ -152,7 +153,7 @@
       </b-card>
     </b-overlay>
   </b-card>
-    <b-modal id="modal-1" ref="editModal" size="lg" title="DL Stock" centered :hide-footer="true">
+    <b-modal id="modal-1" ref="editModal" size="xl" title="DL Stock" centered :hide-footer="true">
       <Form @loadList="loadData" :editItem="editItem"/>
     </b-modal>
     <b-modal id="modal-1" ref="detailsModal" size="lg" title="DL Details Info" centered :hide-footer="true">
@@ -188,14 +189,12 @@ export default {
   },
   data () {
     return {
-      // pagination
-      rows: 100,
-      currentPage: 1,
+      totalRowCount: 0,
       userList: [],
       search: {
         reference_number: '',
         dl_number: '',
-        box_number: '',
+        entry_box_number: '',
         name: '',
         father_name: '',
         dob: '',
@@ -238,7 +237,7 @@ export default {
       this.search = {
         reference_number: '',
         dl_number: '',
-        box_number: '',
+        entry_box_number: '',
         name: '',
         father_name: '',
         dob: '',
@@ -254,6 +253,7 @@ export default {
       var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_dl_stock_data_by_search', params)
       if (result.success) {
         this.listData = result.data.data
+        this.totalRowCount = result.data.total
         this.paginationData(result.data)
       }
       this.loading = false
@@ -273,7 +273,7 @@ export default {
         this.userList = result.data
       }
     },
-    deleteConfirmation (item) {
+    deleteData (item) {
       this.$swal({
         title: 'Are you sure to delete?',
         showCancelButton: true,
@@ -283,11 +283,11 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           // declare confirmed method to hit api
-          this.deleteData(item)
+          this.deleteConfirmation(item)
         }
       })
     },
-    async deleteData (item) {
+    async deleteConfirmation (item) {
       this.loading = true
       var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/delete_dl_stock_data', item)
       if (result.success) {

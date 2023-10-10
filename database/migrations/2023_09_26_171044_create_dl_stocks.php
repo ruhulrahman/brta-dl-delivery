@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('dl_stocks', function (Blueprint $table) {
             $table->id();
             $table->string('reference_number', 30)->nullable();
+            $table->bigInteger('serial_number', 15)->nullable();
             $table->string('dl_number', 40)->nullable();
             $table->string('name', 70)->nullable();
             $table->string('father_name', 70)->nullable();
             $table->date('dob')->nullable();
             $table->string('blood', 3)->nullable();
-            $table->integer('box_number')->nullable();
+            $table->integer('entry_box_number')->nullable();
+            $table->string('receiving_box_number')->nullable();
             $table->dateTime('receive_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
             $table->string('comment', 255)->nullable();

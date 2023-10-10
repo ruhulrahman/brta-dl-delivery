@@ -104,27 +104,6 @@
               </b-form-group>
             </ValidationProvider>
           </b-col>
-          <b-col lg="12" md="12" sm="12" xs="12">
-            <ValidationProvider name="Comment" vid="comment" rules="" v-slot="{ errors }">
-              <b-form-group
-                id="comment"
-                label-for="comment"
-              >
-              <template v-slot:label>
-                Comment <span></span>
-              </template>
-                <b-form-textarea
-                  id="comment"
-                  v-model="form.comment"
-                  placeholder="Enter Comment...."
-                  :state="errors[0] ? false : (valid ? true : null)"
-                ></b-form-textarea>
-                <div class="invalid-feedback">
-                  {{ errors[0] }}
-                </div>
-              </b-form-group>
-            </ValidationProvider>
-          </b-col>
         </b-row>
         <div class="row mt-3">
           <div class="col-sm-3"></div>
@@ -144,7 +123,6 @@ import RestApi, { baseURL } from '@/config'
 
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
-import moment from 'moment'
 
 export default {
   props: ['editItem'],
@@ -156,9 +134,9 @@ export default {
       SaveButton: this.editItem ? 'Update' : 'Save',
       form: {
         serial_number: 1,
-        receive_date: 'today',
+        receive_date: '',
         receiving_box_number: '',
-        reference_number: 'DM',
+        reference_number: '',
         entry_box_number: '',
         dl_number: '',
         name: '',
@@ -178,22 +156,12 @@ export default {
   created () {
     if (this.editItem) {
       this.form = JSON.parse(this.editItem)
-      this.form.receive_date = moment(this.editItem.receive_date).format('DD-MM-YYYY')
-    }
-    if (!this.form.id) {
-      this.getLastDlItem()
     }
   },
   methods: {
     async submitData () {
       this.loading = true
-      let result = ''
-      if (this.form.id) {
-        result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/update_dl_stock_data', this.form)
-      } else {
-        result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/store_dl_stock_data', this.form)
-      }
-      this.loading = false
+      const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/check_duplicate_reference_number', this.form)
       if (result.success) {
         this.$emit('loadList', true)
         this.$toast.success({
@@ -201,19 +169,9 @@ export default {
           message: result.message
         })
         this.$bvModal.hide('modal-1')
+        this.loading = false
       } else {
         this.$refs.form.setErrors(result.errors)
-      }
-    },
-    async getLastDlItem () {
-      const result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_last_dl_stock_data')
-      if (result.success) {
-        if (result.data) {
-          this.form.serial_number = result.data.serial_number + 1
-          this.form.receive_date = moment(result.data.receive_date).format('DD-MM-YYYY')
-          this.form.receiving_box_number = result.data.receiving_box_number
-          this.form.entry_box_number = result.data.entry_box_number
-        }
       }
     }
   }

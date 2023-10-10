@@ -8,8 +8,12 @@
             <td class="text-left">{{ detailsItem.reference_number }}</td>
           </tr>
           <tr>
-            <th class="text-right">Box Number</th>
-            <td class="text-left">{{ detailsItem.box_number }}</td>
+            <th class="text-right">Serial Number</th>
+            <td class="text-left">{{ detailsItem.serial_number }}</td>
+          </tr>
+          <tr>
+            <th class="text-right">Entry Box Number</th>
+            <td class="text-left">{{ detailsItem.entry_box_number }}</td>
           </tr>
           <tr v-if="detailsItem.dl_number">
             <th class="text-right">DL Number</th>
@@ -34,6 +38,10 @@
           <tr v-if="detailsItem.blood">
             <th class="text-right">Blood</th>
             <td class="text-left">{{ detailsItem.blood }}</td>
+          </tr>
+          <tr>
+            <th class="text-right">Receiving Box Number</th>
+            <td class="text-left">{{ detailsItem.receiving_box_number }}</td>
           </tr>
           <tr>
             <th class="text-right">Receive Date</th>

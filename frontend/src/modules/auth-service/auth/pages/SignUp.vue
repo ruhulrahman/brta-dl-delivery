@@ -8,7 +8,7 @@
                 <ValidationObserver ref="form" v-slot="{ handleSubmit, reset }">
                   <b-form @submit.prevent="handleSubmit(submitData)" @reset.prevent="reset" autocomplete="off">
                   <!-- <img class="img-fluid d-block mx-auto" width="100" src="@/assets/images/logo.png" alt=""> -->
-                  <h5 class="text-center mb-3 text-light">Tax Ebook</h5>
+                  <h5 class="text-center mb-3 text-light">Driving License Delivery</h5>
                   <hr class="text-light">
                   <b-row>
                     <b-col lg="6" md="6" sm="6" xs="12">

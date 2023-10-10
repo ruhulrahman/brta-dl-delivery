@@ -9,7 +9,7 @@
               <div class="login-wrapper">
                 <b-card>
                   <!-- <img class="img-fluid d-block mx-auto" width="90" src="@/assets/images/logo.png" alt=""> -->
-                  <h6 class="text-center mt-2 mb-4">Tax Ebook</h6>
+                  <h6 class="text-center mt-2 mb-4">Driving License Delivery</h6>
                   <h6>Forgot Password?</h6>
                   <br>
                   <p style="font-size:13px">Enter your email and we'll send you instructions to reset your password</p>

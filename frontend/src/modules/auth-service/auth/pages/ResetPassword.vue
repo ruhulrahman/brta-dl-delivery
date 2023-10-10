@@ -8,7 +8,7 @@
            <div class="login-wrapper">
              <b-card>
                <!-- <img class="img-fluid d-block mx-auto" width="90" src="@/assets/images/logo.png" alt=""> -->
-               <h6 class="text-center mt-2 mb-4">Tax Ebook</h6>
+               <h6 class="text-center mt-2 mb-4">Driving License Delivery</h6>
                <b-overlay :show="loading">
                 <ValidationObserver ref="form" v-slot="{ handleSubmit, reset }">
                   <b-form @submit.prevent="handleSubmit(resetPassword)" @reset.prevent="reset" autocomplete="off">
