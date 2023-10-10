@@ -1303,10 +1303,7 @@ class AjaxController extends Controller
 			}
 
 
-			// $file = $req->file('file');
-			$file = $req['file'];
-            info($req->all());
-            info($file->get());
+            $file = $req->file('file');
 
 			$dl_stock_import = new \App\Imports\DlStockImport();
 			// $dl_stock_import->import(public_path('static/dl_info_upload_file_sample.xlsx'));
