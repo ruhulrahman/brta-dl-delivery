@@ -498,7 +498,7 @@ class AjaxController extends Controller
                 $query->where('editor_id', $req->editor_id);
             }
 
-            $list = $query->orderBy('id', 'desc')->paginate($default_per_page);
+            $list = $query->orderBy('serial_number', 'desc')->paginate($default_per_page);
 
             // $reference_number_array = [];
 
