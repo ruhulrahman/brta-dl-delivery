@@ -184,7 +184,7 @@
                 <td class="text-center">
                   <div v-if="item.delivery_date">
                     <b v-html="dDate(item.delivery_date)"></b><br/>
-                    Delivered By <span class="badge badge-primary badge-pill" v-if="item.delivered" v-html="item.delivered.name"></span>
+                    <span v-if="item.delivered">Delivered By <span class="badge badge-primary badge-pill" v-html="item.delivered.name"></span></span>
                   </div>
                   <b-form-checkbox v-if="has_permission('dl_delivery')" v-tooltip="item.delivery_date ? 'Click to Undeliver' : 'Click to Deliver'" @change="deliverDrivingLicense(item)" v-model="item.is_delivered" name="check-button" switch>
                   </b-form-checkbox>

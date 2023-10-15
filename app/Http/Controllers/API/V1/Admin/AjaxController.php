@@ -498,9 +498,9 @@ class AjaxController extends Controller
                 $query->where('editor_id', $req->editor_id);
             }
 
-            $list = $query->paginate($default_per_page);
+            $list = $query->orderBy('id', 'desc')->paginate($default_per_page);
 
-            $reference_number_array = [];
+            // $reference_number_array = [];
 
 
             foreach($list as $item) {
@@ -1577,13 +1577,12 @@ class AjaxController extends Controller
 				return response(['msg' => $errors[0]], 422);
 			}
 
-
             $file = $req->file('file');
 
 			$dl_stock_import = new \App\Imports\DlStockImport($user->id);
 			// $dl_stock_import->import(public_path('static/dl_info_upload_file_sample.xlsx'));
-			// $dl_stock_import->import($file);
-			$dl_stock_import->queue($file);
+			$dl_stock_import->import($file);
+			// $dl_stock_import->queue($file);
 
 			$imported_list = $dl_stock_import->getImportedRows();
             // \App\Jobs\DlStoreJob::dispatch($imported_list, $user->id);
@@ -1608,8 +1607,7 @@ class AjaxController extends Controller
 
 			return res_msg('Dl Stock Excel file imported successfully!', 201, [
 				'success' => true,
-				// 'imported_list' => $imported_list,
-				'imported_list' => [],
+				'imported_list' => $imported_list,
 			]);
 
 		} elseif($name=="multiple_dl_stock_store"){

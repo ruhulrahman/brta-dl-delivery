@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 // use Maatwebsite\Excel\Concerns\RemembersRowNumber;
 
-class DlStockImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, SkipsOnError, ShouldQueue
+class DlStockImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, SkipsOnError
 // class DlStockImport implements ToModel, WithHeadingRow
 {
     // use Importable, RemembersRowNumber;
@@ -39,7 +39,6 @@ class DlStockImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     public function model(array $row)
     {
 
-        // info($row);
         if(isset($row['reference_number'])){
             $dlStock = model('DlStock')::where('reference_number', $row['reference_number'])->first();
         }else{
@@ -54,37 +53,33 @@ class DlStockImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             $this->lastReceivingBox = $row['receiving_box_number'];
         }
 
-        // $insertArray = [
-        //     'reference_number' => $row['reference_number'],
-        //     'serial_number' => $row['serial_number'],
-        //     // 'entry_box_number' => $row['entry_box_number'],
-        //     'entry_box_number' => $this->lastEntryBox,
-        //     'receiving_box_number' => $this->lastReceivingBox,
-        //     // 'delivery_date' => $row['delivery_date'] ? new Carbon($row['delivery_date']) : NULL,
-        //     'delivery_date' => $row['delivery_date'] ? $row['delivery_date'] : NULL,
-        //     'comment' => $row['comment'] ? $row['comment'] : NULL,
-        //     // 'receive_date' => $row['receive_date'] ? new Carbon($row['receive_date']) : NULL,
-        //     'receive_date' => Carbon::now()->subDays(120),
-        //     'is_duplicate' =>$dlStock ? true : false,
-        //     'match_reference_number' => $dlStock ? $dlStock->reference_number : 0,
-        // ];
-
-        return new DlStock([
-            'id' => random_int((int) 10000000000000000, (int) 99999999999999999999),
-            'reference_number' => $row['reference_number'] ? $row['reference_number'] : NULL,
-            'serial_number' => $row['serial_number'] ? $row['serial_number'] : NULL,
+        $insertArray = [
+            'reference_number' => $row['reference_number'],
+            'serial_number' => $row['serial_number'],
             'entry_box_number' => $this->lastEntryBox,
             'receiving_box_number' => $this->lastReceivingBox,
-            'receive_date' => $row['receive_date'] ? new Carbon($row['receive_date']) : NULL,
-            'delivery_date' => $row['delivery_date'] ? $row['delivery_date'] : NULL,
+            'receive_date' => $row['receive_date'] ? get_excel_date_to_real_date($row['receive_date']) : NULL,
+            'delivery_date' => $row['delivery_date'] ? get_excel_date_to_real_date($row['delivery_date']) : NULL,
             'comment' => $row['comment'] ? $row['comment'] : NULL,
-            'creator_id' => $this->user_id,
-            'created_at' => Carbon::now(),
-        ]);
+            'is_duplicate' =>$dlStock ? true : false,
+            'match_reference_number' => $dlStock ? $dlStock->reference_number : 0,
+        ];
 
-        // model('DlStock')::create($insertArray);
+        array_push($this->imported_list, $insertArray);
 
-        // array_push($this->imported_list, $insertArray);
+
+        // return new DlStock([
+        //     'id' => random_int((int) 1000000000000, (int) 99999999999999999999),
+        //     'reference_number' => $row['reference_number'] ? $row['reference_number'] : NULL,
+        //     'serial_number' => $row['serial_number'] ? $row['serial_number'] : NULL,
+        //     'entry_box_number' => $this->lastEntryBox,
+        //     'receiving_box_number' => $this->lastReceivingBox,
+        //     'receive_date' => $row['receive_date'] ? get_excel_date_to_real_date($row['receive_date']) : NULL,
+        //     'delivery_date' => $row['delivery_date'] ? get_excel_date_to_real_date($row['delivery_date']) : NULL,
+        //     'comment' => $row['comment'] ? $row['comment'] : NULL,
+        //     'creator_id' => $this->user_id,
+        //     'created_at' => Carbon::now(),
+        // ]);
     }
 
     public function getImportedRows()

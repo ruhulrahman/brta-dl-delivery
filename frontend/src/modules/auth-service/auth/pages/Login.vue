@@ -2,7 +2,7 @@
   <b-container fluid class="px-0">
     <b-row align-v="center" no-gutters>
        <b-col md="8" class="d-none d-md-block">
-           <!-- <div class="login-bg"></div> -->
+           <div class="login-bg"></div>
        </b-col>
       <b-col sm="12" md="4" class="bg-light">
            <div class="login-wrapper">

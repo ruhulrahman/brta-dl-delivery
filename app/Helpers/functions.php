@@ -796,6 +796,18 @@ else{
 
 	}
 
+	function get_excel_date_to_real_date_value($excel_date = NULL){
+		if ($excel_date) {
+
+            $UNIX_DATE = ($excel_date - 25569) * 86400;
+            return gmdate("d-m-Y H:i:s", $UNIX_DATE);
+
+		} else {
+			return NULL;
+		}
+
+	}
+
 	function get_excel_date_to_real_date($excel_date = NULL){
 		if ($excel_date) {
 			/* Please use this formula to change from Excel date to Unix date, then you can use "gmdate" to get the real date in PHP */
