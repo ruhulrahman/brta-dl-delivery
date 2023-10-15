@@ -5,30 +5,30 @@ const childRoutes = (prop) => [
     meta: { auth: true, name: 'Editable' },
     component: () => import('../pages/Dashboard.vue')
   },
-  {
-    path: 'template-one',
-    name: prop + 'template_one',
-    meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/template-one/List.vue')
-  },
-  {
-    path: 'subscriber',
-    name: prop + 'subscriber',
-    meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/subscriber/List.vue')
-  },
-  {
-    path: 'admin',
-    name: prop + 'admin',
-    meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/admin/List.vue')
-  },
-  {
-    path: 'cart',
-    name: prop + 'cart',
-    meta: { auth: true, name: 'Editable' },
-    component: () => import('../pages/cart/List.vue')
-  },
+  // {
+  //   path: 'template-one',
+  //   name: prop + 'template_one',
+  //   meta: { auth: true, name: 'Editable' },
+  //   component: () => import('../pages/template-one/List.vue')
+  // },
+  // {
+  //   path: 'subscriber',
+  //   name: prop + 'subscriber',
+  //   meta: { auth: true, name: 'Editable' },
+  //   component: () => import('../pages/subscriber/List.vue')
+  // },
+  // {
+  //   path: 'admin',
+  //   name: prop + 'admin',
+  //   meta: { auth: true, name: 'Editable' },
+  //   component: () => import('../pages/admin/List.vue')
+  // },
+  // {
+  //   path: 'cart',
+  //   name: prop + 'cart',
+  //   meta: { auth: true, name: 'Editable' },
+  //   component: () => import('../pages/cart/List.vue')
+  // },
   {
     path: 'permission',
     name: prop + 'permission',
@@ -73,6 +73,12 @@ const childRoutes = (prop) => [
     name: prop + 'import_dl',
     meta: { auth: true, name: 'Editable' },
     component: () => import('../pages/delivery/ImportDrivingLicense.vue')
+  },
+  {
+    path: 'dl-restore',
+    name: prop + 'dl_restore',
+    meta: { auth: true, name: 'Editable' },
+    component: () => import('../pages/delivery/DlRestoreList.vue')
   }
 ]
 

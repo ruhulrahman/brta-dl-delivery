@@ -17,7 +17,7 @@ export default new Vuex.Store({
     list: [],
     notificationList: [],
     toggleNotification: false,
-    permission_disable: true,
+    permission_disable: false,
     commonObj: {
       hasDropdownLoaded: false,
       dateFormat: 'DD/MM/YYYY',

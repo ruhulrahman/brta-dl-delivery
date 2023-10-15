@@ -63,9 +63,12 @@
                             <div class="card wait_me_to_process" v-show="excelFileImported">
                                 <div class="card-body">
                                   <div class="row mt-2 mb-2">
-                                    <div class="col-lg-12 text-right">
+                                    <div class="col-lg-6">
+                                      <p class="pl-2">Total {{ importedList.length }} Rows</p>
+                                    </div>
+                                    <div class="col-lg-6 text-right">
                                       <button @click="remove_and_re_upload()" class="btn btn-danger mr-2">Remove All Data</button>
-                                      <button @click="processToUploadData(importedList)" class="btn btn-success mr-2">Process To Upload Data</button>
+                                      <button @click="processToUploadData()" class="btn btn-success mr-2">Process To Upload Data</button>
                                     </div>
                                   </div>
                                   <div class="table-responsive">
@@ -301,13 +304,12 @@ export default {
     },
     vsuccess: function (file, response) {
       this.importedList = response.data.imported_list.map((item, index) => {
-        const mapData = {
-          index: index
-        }
-        return Object.assign({}, item, mapData)
+        item.index = index
+        return Object.assign(item)
       })
       this.$refs.dl_list_upload_dropzone.removeAllFiles()
       this.excelFileImported = true
+      console.log('this.importedList', this.importedList)
       // this.check_duplicate_exists()
     },
     verror: function (file, response) {
@@ -353,24 +355,61 @@ export default {
     },
     async submitData () {
       this.loading = true
-      const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/check_duplicate_reference_number', this.editItem)
+
+      const objIndex = this.importedList.findIndex(item => item.index === this.editItem.index)
+      this.importedList[objIndex].reference_number = this.editItem.reference_number
+      this.importedList[objIndex].serial_number = this.editItem.serial_number
+      this.importedList[objIndex].entry_box_number = this.editItem.entry_box_number
+      this.importedList[objIndex].receiving_box_number = this.editItem.receiving_box_number
+      this.importedList[objIndex].delivery_date = this.editItem.delivery_date
+      this.importedList[objIndex].comment = this.editItem.comment
+      this.importedList[objIndex].is_duplicate = false
+
+      this.$bvModal.hide('modal-1')
+      // const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/check_duplicate_reference_number', this.editItem)
+      this.loading = false
+      // if (result.success) {
+      //   const objIndex = this.importedList.findIndex(item => item.index === this.editItem.index)
+      //   this.importedList[objIndex].reference_number = this.editItem.reference_number
+      //   this.importedList[objIndex].serial_number = this.editItem.serial_number
+      //   this.importedList[objIndex].entry_box_number = this.editItem.entry_box_number
+      //   this.importedList[objIndex].receiving_box_number = this.editItem.receiving_box_number
+      //   this.importedList[objIndex].delivery_date = this.editItem.delivery_date
+      //   this.importedList[objIndex].comment = this.editItem.comment
+      //   this.importedList[objIndex].is_duplicate = false
+
+      //   this.$bvModal.hide('modal-1')
+      // } else {
+      //   this.$refs.form.setErrors(result.errors)
+      // }
+    },
+    processToUploadData: async function () {
+      this.loading = true
+      this.importedList.map(item => {
+        item.reference_number = item.reference_number ? item.reference_number : null
+        item.delivery_date = item.delivery_date ? item.delivery_date : null
+        item.comment = item.comment ? item.comment : null
+        return Object.assign(item)
+      })
+      console.log('this.importedList', this.importedList)
+      const result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/multiple_dl_stock_store', { list: this.importedList })
       this.loading = false
       if (result.success) {
-        const objIndex = this.importedList.findIndex(item => item.index === this.editItem.index)
-        this.importedList[objIndex].reference_number = this.editItem.reference_number
-        this.importedList[objIndex].serial_number = this.editItem.serial_number
-        this.importedList[objIndex].entry_box_number = this.editItem.entry_box_number
-        this.importedList[objIndex].receiving_box_number = this.editItem.receiving_box_number
-        this.importedList[objIndex].delivery_date = this.editItem.delivery_date
-        this.importedList[objIndex].comment = this.editItem.comment
-        this.importedList[objIndex].is_duplicate = false
-
-        this.$bvModal.hide('modal-1')
+        // this.importedList = []
+        // this.$refs.dl_list_upload_dropzone.removeAllFiles()
+        this.excelFileImported = false
+        this.$toast.success({
+          title: 'Success',
+          message: result.message
+        })
       } else {
-        this.$refs.form.setErrors(result.errors)
+        this.$toast.error({
+          title: 'Validation Error',
+          message: result.errors
+        })
       }
     },
-    processToUploadData: async function (data) {
+    processToUploadData2: async function (data) {
       const isDuplicate = data.find(item => item.is_duplicate)
 
       if (isDuplicate) {

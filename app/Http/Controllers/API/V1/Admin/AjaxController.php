@@ -420,7 +420,7 @@ class AjaxController extends Controller
             $query = model('DlStock')::with('creator', 'editor', 'delivered');
 
             if($req->reference_number) {
-                $query->where('reference_number', $req->reference_number);
+                $query->where('reference_number', 'like', "%$req->reference_number%");
             }
 
             if($req->dl_number) {
@@ -429,6 +429,10 @@ class AjaxController extends Controller
 
             if($req->entry_box_number) {
                 $query->where('entry_box_number', $req->entry_box_number);
+            }
+
+            if($req->receiving_box_number) {
+                $query->where('receiving_box_number', $req->receiving_box_number);
             }
 
             if($req->name) {
@@ -443,19 +447,163 @@ class AjaxController extends Controller
                 $query->whereDate('dob', new Carbon($req->dob));
             }
 
-            if($req->receive_date) {
-                $query->whereDate('receive_date', new Carbon($req->receive_date));
+            // if($req->receive_date) {
+            //     $query->whereDate('receive_date', new Carbon($req->receive_date));
+            // }
+
+            if($req->receive_end_date) {
+                $query->whereDate('receive_date', '>=', new Carbon($req->receive_start_date))
+                ->whereDate('receive_date', '<=', new Carbon($req->receive_end_date));
             }
 
-            if($req->delivery_date) {
-                $query->whereDate('delivery_date', new Carbon($req->delivery_date));
+            if(!$req->receive_end_date && $req->receive_start_date) {
+                $query->whereDate('receive_date', '>=', new Carbon($req->receive_start_date));
+            }
+
+            // if($req->delivery_date) {
+            //     $query->whereDate('delivery_date', new Carbon($req->delivery_date));
+            // }
+
+            if($req->delivery_end_date) {
+                $query->whereDate('delivery_date', '>=', new Carbon($req->delivery_start_date))
+                ->whereDate('delivery_date', '<=', new Carbon($req->delivery_end_date));
+            }
+
+            if(!$req->delivery_end_date && $req->delivery_start_date) {
+                $query->whereDate('delivery_date', '>=', new Carbon($req->delivery_start_date));
+            }
+
+            // if($req->created_at) {
+            //     $query->whereDate('created_at', new Carbon($req->created_at));
+            // }
+
+            if($req->created_end_date) {
+                $query->whereDate('created_at', '>=', new Carbon($req->created_start_date))
+                ->whereDate('created_at', '<=', new Carbon($req->created_end_date));
+            }
+
+            if(!$req->created_end_date && $req->created_start_date) {
+                $query->whereDate('created_at', '>=', new Carbon($req->created_start_date));
             }
 
             if($req->delivered_id) {
                 $query->where('delivered_id', $req->delivered_id);
             }
 
+            if($req->creator_id) {
+                $query->where('creator_id', $req->creator_id);
+            }
+
+            if($req->editor_id) {
+                $query->where('editor_id', $req->editor_id);
+            }
+
             $list = $query->paginate($default_per_page);
+
+            $reference_number_array = [];
+
+
+            foreach($list as $item) {
+                $item->is_delivered = $item->delivery_date ? true : false;
+                // array_push($reference_number_array, $item->reference_number);
+                // $reference_number_array = [];
+                // $dlStock = model('DlStock')::where('reference_number', $item->reference_number)->first();
+                // $item->is_duplicate = $dlStock ? true : false;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'DL data fetched Successfully!',
+                'data' => $list
+            ], 200);
+        } else if ($name == 'get_deleted_dl_stock_data_by_search') {
+
+            $query = model('DlStock')::onlyTrashed()->with('creator', 'editor', 'delivered');
+
+            if($req->reference_number) {
+                $query->where('reference_number', 'like', "%$req->reference_number%");
+            }
+
+            if($req->dl_number) {
+                $query->where('dl_number', $req->dl_number);
+            }
+
+            if($req->entry_box_number) {
+                $query->where('entry_box_number', $req->entry_box_number);
+            }
+
+            if($req->receiving_box_number) {
+                $query->where('receiving_box_number', $req->receiving_box_number);
+            }
+
+            if($req->name) {
+                $query->whereDate('name', 'LIKE', "%$req->name%");
+            }
+
+            if($req->father_name) {
+                $query->whereDate('father_name', 'LIKE', "%$req->father_name%");
+            }
+
+            if($req->dob) {
+                $query->whereDate('dob', new Carbon($req->dob));
+            }
+
+            // if($req->receive_date) {
+            //     $query->whereDate('receive_date', new Carbon($req->receive_date));
+            // }
+
+            if($req->receive_end_date) {
+                $query->whereDate('receive_date', '>=', new Carbon($req->receive_start_date))
+                ->whereDate('receive_date', '<=', new Carbon($req->receive_end_date));
+            }
+
+            if(!$req->receive_end_date && $req->receive_start_date) {
+                $query->whereDate('receive_date', '>=', new Carbon($req->receive_start_date));
+            }
+
+            // if($req->delivery_date) {
+            //     $query->whereDate('delivery_date', new Carbon($req->delivery_date));
+            // }
+
+            if($req->delivery_end_date) {
+                $query->whereDate('delivery_date', '>=', new Carbon($req->delivery_start_date))
+                ->whereDate('delivery_date', '<=', new Carbon($req->delivery_end_date));
+            }
+
+            if(!$req->delivery_end_date && $req->delivery_start_date) {
+                $query->whereDate('delivery_date', '>=', new Carbon($req->delivery_start_date));
+            }
+
+            // if($req->created_at) {
+            //     $query->whereDate('created_at', new Carbon($req->created_at));
+            // }
+
+            if($req->created_end_date) {
+                $query->whereDate('created_at', '>=', new Carbon($req->created_start_date))
+                ->whereDate('created_at', '<=', new Carbon($req->created_end_date));
+            }
+
+            if(!$req->created_end_date && $req->created_start_date) {
+                $query->whereDate('created_at', '>=', new Carbon($req->created_start_date));
+            }
+
+            if($req->delivered_id) {
+                $query->where('delivered_id', $req->delivered_id);
+            }
+
+            if($req->creator_id) {
+                $query->where('creator_id', $req->creator_id);
+            }
+
+            if($req->editor_id) {
+                $query->where('editor_id', $req->editor_id);
+            }
+
+            $list = $query->paginate($default_per_page);
+
+            foreach($list as $item) {
+                $item->is_delivered = $item->delivery_date ? true : false;
+            }
 
             return response()->json([
                 'success' => true,
@@ -788,8 +936,9 @@ class AjaxController extends Controller
             $validate = Validator::make($request->all(), [
                 'name' => 'required',
                 'email' => 'required|unique:users,email',
-                'phone' => 'required|unique:users,phone'
-                // 'role_id' => 'required'
+                'phone' => 'required|unique:users,phone',
+                'password' => 'required|string|min:8',
+                'c_password' => 'required|same:password',
             ]);
 
             if ($validate->fails()) {
@@ -804,6 +953,9 @@ class AjaxController extends Controller
 
                 $input = $request->all();
                 $input['user_type'] = 'admin';
+
+                $input['password'] = bcrypt($req->password);
+
                 $model = model('User')::create($input);
 
                 return response()->json([
@@ -853,22 +1005,24 @@ class AjaxController extends Controller
                 $requestAll['email'] = $request->email;
                 $requestAll['phone'] = $request->phone;
                 $requestAll['active'] = $request->active == 'true' ? 1 : 0;
-                if ($req->password) {
-                    $validate = validate_ajax([
-                        'password' => 'required|string|min:8',
-                        'c_password' => 'required|same:password',
-                    ]);
+                $requestAll['password'] = bcrypt($req->password);
 
-                    if ($validate->fails()) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => 'validation error',
-                            'errors' => $validate->errors()
-                        ], 422);
-                    }
+                // if ($req->password) {
+                //     $validate = validate_ajax([
+                //         'password' => 'required|string|min:8',
+                //         'c_password' => 'required|same:password',
+                //     ]);
 
-                    $requestAll['password'] = bcrypt($req->password);
-                }
+                //     if ($validate->fails()) {
+                //         return response()->json([
+                //             'status' => false,
+                //             'message' => 'validation error',
+                //             'errors' => $validate->errors()
+                //         ], 422);
+                //     }
+
+                //     $requestAll['password'] = bcrypt($req->password);
+                // }
 
                 $updateUser->fill($requestAll);
                 $updateUser->save();
@@ -1104,7 +1258,8 @@ class AjaxController extends Controller
                 'serial_number' => 'required',
                 'receive_date' => 'required',
                 'receiving_box_number' => 'required',
-                'reference_number' => 'required|unique:dl_stocks,reference_number',
+                // 'reference_number' => 'required|unique:dl_stocks,reference_number',
+                'reference_number' => 'required',
                 'entry_box_number' => 'required',
                 // 'dl_number' => 'required|unique:dl_stocks,dl_number',
             ]);
@@ -1153,8 +1308,8 @@ class AjaxController extends Controller
 
             $validate = Validator::make($req->all(), [
                 'serial_number' => 'required',
-                'receive_date' => 'required',
-                'receiving_box_number' => 'required',
+                // 'receive_date' => 'required',
+                // 'receiving_box_number' => 'required',
                 // 'reference_number' => 'required|unique:dl_stocks,reference_number,'.$id,
                 'reference_number' => 'required',
                 'entry_box_number' => 'required',
@@ -1169,20 +1324,20 @@ class AjaxController extends Controller
                 ], 422);
             }
 
-            $dlStockById = model("DlStock")::find($req->id);
-            $dlStockByReference = model("DlStock")::where('reference_number', $req->reference_number)->first();
+            // $dlStockById = model("DlStock")::find($req->id);
+            // $dlStockByReference = model("DlStock")::where('reference_number', $req->reference_number)->first();
 
-            if ($dlStockByReference && $dlStockByReference->id != $dlStockById->id) {
-                $errors = new \stdClass;
-                $errors->reference_number = ["The reference number has already been taken."];
+            // if ($dlStockByReference && $dlStockByReference->id != $dlStockById->id) {
+            //     $errors = new \stdClass;
+            //     $errors->reference_number = ["The reference number has already been taken."];
 
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $errors
-                ], 422);
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'validation error',
+            //         'errors' => $errors
+            //     ], 422);
 
-            }
+            // }
 
             try {
 
@@ -1255,6 +1410,90 @@ class AjaxController extends Controller
                     'message' => $th->getMessage()
                 ], 500);
             }
+        } else if ($name == 'restore_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'id' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::onlyTrashed()->find($req->id);
+
+                if (!$dlStock) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data not found.'
+                    ], 422);
+                }
+
+                $dlStock->deleted_at = NULL;
+                $dlStock->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data restored successfully',
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'deliver_and_undeliver_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'id' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::find($req->id);
+
+                $dlStock->update([
+                    'delivery_date' => $dlStock->delivery_date ? NULL : Carbon::now(),
+                    'comment' => $req->comment,
+                    'delivered_id' => $dlStock->delivery_date ? NULL : $user->id,
+                ]);
+
+                $message = '';
+
+                if ($dlStock->delivery_date) {
+                    $message = 'Data delivered successfully';
+                } else {
+                    $message = 'Data undelivered successfully';
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
         } else if ($name == 'deliver_dl_stock_data') {
 
             $validate = Validator::make($request->all(), [
@@ -1291,6 +1530,42 @@ class AjaxController extends Controller
                     'message' => $th->getMessage()
                 ], 500);
             }
+        } else if ($name == 'un_deliver_dl_stock_data') {
+
+            $validate = Validator::make($request->all(), [
+                'id' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validate->errors()
+                ], 422);
+            }
+
+            try {
+
+                $dlStock = model('DlStock')::find($req->id);
+
+                $dlStock->update([
+                    'delivery_date' => NULL,
+                    'comment' => $req->comment,
+                    'delivered_id' => NULL,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data undelivered successfully',
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
         } elseif($name=="multiple_dl_info_excel_file_import"){
 
 			$validator = Validator::make($req->all(), [
@@ -1305,54 +1580,80 @@ class AjaxController extends Controller
 
             $file = $req->file('file');
 
-			$dl_stock_import = new \App\Imports\DlStockImport();
+			$dl_stock_import = new \App\Imports\DlStockImport($user->id);
 			// $dl_stock_import->import(public_path('static/dl_info_upload_file_sample.xlsx'));
-			$dl_stock_import->import($file);
+			// $dl_stock_import->import($file);
+			$dl_stock_import->queue($file);
 
 			$imported_list = $dl_stock_import->getImportedRows();
+            // \App\Jobs\DlStoreJob::dispatch($imported_list, $user->id);
+
+            // foreach($imported_list as $item){
+
+            //     if ($item) {
+            //         model('DlStock')::create([
+            //             'reference_number' => $item['reference_number'] ? $item['reference_number'] : NULL,
+            //             'serial_number' => $item['serial_number'] ? $item['serial_number'] : NULL,
+            //             'entry_box_number' => $item['entry_box_number'] ? $item['entry_box_number'] : NULL,
+            //             'receiving_box_number' => $item['receiving_box_number'] ? $item['receiving_box_number'] : NULL,
+            //             'receive_date' => $item['receive_date'] ? new Carbon($item['receive_date']) : NULL,
+            //             // 'delivery_date' => new Carbon($item['delivery_date']),
+            //             'delivery_date' => $item['delivery_date'] ? $item['delivery_date'] : NULL,
+            //             'comment' => $item['comment'] ? $item['comment'] : NULL,
+            //             'creator_id' => $user->id,
+            //             'created_at' => Carbon::now(),
+            //         ]);
+            //     }
+			// }
 
 			return res_msg('Dl Stock Excel file imported successfully!', 201, [
 				'success' => true,
-				'imported_list' => $imported_list,
+				// 'imported_list' => $imported_list,
+				'imported_list' => [],
 			]);
 
-		} elseif($name=="mulitiple_dl_stock_store"){
+		} elseif($name=="multiple_dl_stock_store"){
 
-			$validator = Validator::make($req->all(), [
-				'data'=> 'required|array',
-				'data.*.reference_number' => 'required',
-				'data.*.serial_number' => 'required',
-				'data.*.entry_box_number' => 'required',
-				'data.*.receiving_box_number' => 'required',
-			], [
-				'data.*.reference_number.required' => 'Please fill the reference_number field.',
-				'data.*.serial_number.required' => 'Please fill the serial_number field.',
-				'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
-				'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
-			]);
+			// $validator = Validator::make($req->all(), [
+			// 	'data'=> 'required|array',
+			// 	'data.*.reference_number' => 'required',
+			// 	'data.*.serial_number' => 'required',
+			// 	'data.*.entry_box_number' => 'required',
+			// 	'data.*.receiving_box_number' => 'required',
+			// ], [
+			// 	'data.*.reference_number.required' => 'Please fill the reference_number field.',
+			// 	'data.*.serial_number.required' => 'Please fill the serial_number field.',
+			// 	'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
+			// 	'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
+			// ]);
 
-			if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+			// if ($validator->fails()) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'validation error',
+            //         'errors' => $validator->errors()
+            //     ], 422);
+            // }
 
+            \App\Jobs\DlStoreJob::dispatch($req->list, $user->id);
 
-			foreach($req->data as $item){
-                $model = model('DlStock')::create([
-                    'reference_number' => $item['reference_number'],
-                    'serial_number' => $item['serial_number'],
-                    'entry_box_number' => $item['entry_box_number'],
-                    'receiving_box_number' => $item['receiving_box_number'],
-                    'receive_date' => new Carbon($item['receive_date']),
-                    'delivery_date' => new Carbon($item['delivery_date']),
-                    'comment' => $item['comment'],
-                    'creator_id' => $user->id,
-                    'created_at' => Carbon::now(),
-                ]);
-			}
+			// foreach($req->list as $item){
+
+            //     if ($item) {
+            //         model('DlStock')::create([
+            //             'reference_number' => $item['reference_number'] ? $item['reference_number'] : NULL,
+            //             'serial_number' => $item['serial_number'] ? $item['serial_number'] : NULL,
+            //             'entry_box_number' => $item['entry_box_number'] ? $item['entry_box_number'] : NULL,
+            //             'receiving_box_number' => $item['receiving_box_number'] ? $item['receiving_box_number'] : NULL,
+            //             'receive_date' => $item['receive_date'] ? new Carbon($item['receive_date']) : NULL,
+            //             // 'delivery_date' => new Carbon($item['delivery_date']),
+            //             'delivery_date' => $item['delivery_date'] ? $item['delivery_date'] : NULL,
+            //             'comment' => $item['comment'] ? $item['comment'] : NULL,
+            //             'creator_id' => $user->id,
+            //             'created_at' => Carbon::now(),
+            //         ]);
+            //     }
+			// }
 
             return response()->json([
                 'success' => true,

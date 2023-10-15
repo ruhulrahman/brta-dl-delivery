@@ -24,7 +24,7 @@
             </ValidationProvider>
           </b-col>
           <b-col lg="4" md="4" sm="12" xs="12">
-            <ValidationProvider name="Receiving Box Number" vid="receiving_box_number" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Receiving Box Number" vid="receiving_box_number" v-slot="{ errors }">
               <b-form-group label-for="receiving_box_number">
               <template v-slot:label>
                 Receiving Box Number <span class="text-danger">*</span>
@@ -42,7 +42,7 @@
             </ValidationProvider>
           </b-col>
           <b-col lg="4" md="4" sm="12" xs="12">
-            <ValidationProvider name="Receive Date" vid="receive_date" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Receive Date" vid="receive_date" v-slot="{ errors }">
               <b-form-group
                 label-for="receive_date">
                 <template v-slot:label>

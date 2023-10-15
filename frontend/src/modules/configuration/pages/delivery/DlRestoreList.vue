@@ -102,36 +102,6 @@
                   ></v-select>
                   </b-form-group>
                 </b-col>
-                <b-col sm="12" md="3">
-                  <b-form-group
-                      id="creator_id"
-                      label="Created By"
-                      label-for="creator_id"
-                  >
-                  <v-select
-                  id="creator_id"
-                  v-model="search.creator_id"
-                  :options="userList"
-                  :reduce="item => item.value"
-                  placeholder="Select User"
-                  ></v-select>
-                  </b-form-group>
-                </b-col>
-                <b-col sm="12" md="3">
-                  <b-form-group
-                      id="created_at"
-                      label="Created Date"
-                      label-for="created_at"
-                  >
-                      <flat-pickr
-                        id="created_at"
-                        v-model="search.created_at"
-                        class="form-control"
-                        placeholder="Select Created Date"
-                        :config="flatPickrConfigWithRange"
-                      />
-                  </b-form-group>
-                </b-col>
                 <b-col v-if="has_permission('dl_search')" class="text-left mt-3" sm="12" md="3">
                   <b-button type="submit" size="sm" variant="primary"><i class="ri-search-line"></i> Search</b-button>
                   <b-button size="sm ml-1" variant="danger" @click="clearData"><i class="ri-close-line"></i> Clear</b-button>
@@ -161,41 +131,31 @@
             <thead>
               <tr style="font-size: 13px;">
                 <th scope="col" class="text-center">Reference Number</th>
-                <th v-if="has_permission('dl_view_as_viewer')" scope="col" class="text-center">Entry Box Number</th>
+                <th scope="col" class="text-center">Entry Box Number</th>
                 <th scope="col" class="text-center">Receiving Box Number</th>
-                <th v-if="has_permission('dl_view_as_viewer')" scope="col" class="text-center">Serial Number</th>
-                <!-- <th scope="col" class="text-center">Receive Date</th> -->
+                <th scope="col" class="text-center">Serial Number</th>
                 <th scope="col" class="text-center">Delivery Date</th>
                 <th scope="col" class="text-center">Comment</th>
-                <th v-if="has_permission('dl_view_as_viewer')" scope="col" class="text-center">Action</th>
+                <th scope="col" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody v-for="(item, index) in listData" :key="index">
               <tr style="font-size: 12px;">
-                <!-- <td scope="row" class="text-center">{{ index + pagination.slOffset }}</td> -->
-                <td class="text-center">
-                  <span v-html="item.reference_number" class="mr-1"></span>
-                  <i v-if="item.is_duplicate" v-tooltip="'Duplicate entry'" class="ri-error-warning-fill text-warning"></i>
-                </td>
-                <td v-if="has_permission('dl_view_as_viewer')" class="text-center">{{ item.entry_box_number }}</td>
+                <td class="text-center">{{ item.reference_number }}</td>
+                <td class="text-center">{{ item.entry_box_number }}</td>
                 <td class="text-center">{{ item.receiving_box_number }}</td>
-                <td v-if="has_permission('dl_view_as_viewer')" scope="row" class="text-center">{{ item.serial_number }}</td>
-                <!-- <td class="text-center"><span v-if="item.receive_date" v-html="dDate(item.receive_date)"></span></td> -->
+                <td scope="row" class="text-center">{{ item.serial_number }}</td>
                 <td class="text-center">
                   <div v-if="item.delivery_date">
                     <b v-html="dDate(item.delivery_date)"></b><br/>
                     Delivered By <span class="badge badge-primary badge-pill" v-if="item.delivered" v-html="item.delivered.name"></span>
                   </div>
-                  <b-form-checkbox v-if="has_permission('dl_delivery')" v-tooltip="item.delivery_date ? 'Click to Undeliver' : 'Click to Deliver'" @change="deliverDrivingLicense(item)" v-model="item.is_delivered" name="check-button" switch>
-                  </b-form-checkbox>
-                  <!-- <b-form-checkbox v-tooltip="'Click to Undeliver'" v-else @change="undeliverDrivingLicense(item)" v-model="item.active" name="check-button" switch>
-                  </b-form-checkbox> -->
                 </td>
                 <td class="text-center">{{ item.comment }}</td>
-                <td v-if="has_permission('dl_view_as_viewer')" class="text-center">
-                  <a v-tooltip="'View'" v-if="has_permission('dl_view_details')" style="width: 20px !important; height: 19px !important; font-size: 10px;" href="javascript:" class="action-btn active" @click="viewDetails(item)"><i class="ri-eye-fill"></i></a>
-                  <a v-tooltip="'Edit'" v-if="has_permission('dl_edit')" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn edit" @click="editData(item)"><i class="ri-pencil-fill"></i></a>
-                  <a v-tooltip="'Delete'" v-if="has_permission('dl_delete')" @click="deleteData(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete"><i class="ri-delete-bin-2-line"></i></a>
+                <td class="text-center">
+                  <a v-tooltip="'Restore'" v-if="has_permission('dl_restore')" @click="restoreData(item)" style="width: 20px !important; height: 20px !important; font-size:10px" href="javascript:" class="action-btn delete">
+                    <i class="ri-arrow-go-back-line"></i>
+                  </a>
                 </td>
               </tr>
             </tbody>
@@ -345,52 +305,17 @@ export default {
         }
       }
       const params = Object.assign({}, this.search, { page: this.pagination.currentPage, per_page: this.pagination.perPage })
-      var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_dl_stock_data_by_search', params)
+      var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_deleted_dl_stock_data_by_search', params)
       if (result.success) {
         this.listData = result.data.data
-        if (this.listData.length) {
-          this.listData.map(item => {
-            const referenceNumbers = this.listData.filter(data => data.reference_number === item.reference_number)
-            if (referenceNumbers.length > 1) {
-              item.is_duplicate = true
-            } else {
-              item.is_duplicate = false
-            }
-            return Object.assign(item)
-          })
-        }
         this.totalRowCount = result.data.total
         this.paginationData(result.data)
       }
       this.loading = false
     },
-    async deliverDrivingLicense (item) {
-      this.loading = true
-      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/deliver_and_undeliver_dl_stock_data', item)
-      if (result.success) {
-        this.$toast.success({ title: 'Success', message: result.message })
-        this.loadData()
-      }
-      this.loading = false
-    },
-    async undeliverDrivingLicense (item) {
-      this.loading = true
-      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/un_deliver_dl_stock_data', item)
-      if (result.success) {
-        this.$toast.success({ title: 'Success', message: result.message })
-        this.loadData()
-      }
-      this.loading = false
-    },
-    async getActiveUserList () {
-      var result = await RestApi.getData(baseURL, 'api/v1/admin/ajax/get_total_active_user_list')
-      if (result.success) {
-        this.userList = result.data
-      }
-    },
-    deleteData (item) {
+    restoreData (item) {
       this.$swal({
-        title: 'Are you sure to delete?',
+        title: 'Are you sure to restore?',
         showCancelButton: true,
         confirmButtonText: 'Yes',
         cancelButtonText: 'No',
@@ -404,7 +329,7 @@ export default {
     },
     async deleteConfirmation (item) {
       this.loading = true
-      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/delete_dl_stock_data', item)
+      var result = await RestApi.postData(baseURL, 'api/v1/admin/ajax/restore_dl_stock_data', item)
       if (result.success) {
         this.$toast.success({
           title: 'Success',

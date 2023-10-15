@@ -22,11 +22,19 @@
                         </a>
                     </router-link>
                 </li>
-                <li v-if="has_permission('subscription_plan')">
+                <li v-if="has_permission('delivery')">
                     <router-link to="/delivery">
                         <a href="">
                           <i class="ri-building-3-fill pr-2"></i>
                         Delivery
+                        </a>
+                    </router-link>
+                </li>
+                <li v-if="has_permission('dl_restore')">
+                    <router-link to="/dl-restore">
+                        <a href="">
+                          <i class="ri-building-3-fill pr-2"></i>
+                        DL Restore
                         </a>
                     </router-link>
                 </li>
@@ -37,11 +45,11 @@
                         <i class="ri-arrow-down-s-line cus-arrow"></i>
                     </a>
                     <ul class="sub-menu">
-                        <li v-if="has_permission('permission')" style="margin-left: 50px;">
+                        <!-- <li v-if="has_permission('permission')" style="margin-left: 50px;">
                             <router-link to="/permission">
                                <p>Permission</p>
                             </router-link>
-                        </li>
+                        </li> -->
                         <li v-if="has_permission('role')" style="margin-left: 50px;">
                             <router-link to="/role">
                                 <p>Role</p>
