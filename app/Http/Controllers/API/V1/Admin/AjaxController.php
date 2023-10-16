@@ -1670,16 +1670,16 @@ class AjaxController extends Controller
 		} elseif($name=="multiple_dl_stock_store"){
 
 			$validator = Validator::make($req->all(), [
-				'data'=> 'required|array',
-				'data.*.reference_number' => 'required',
-				'data.*.serial_number' => 'required',
-				'data.*.entry_box_number' => 'required',
-				'data.*.receiving_box_number' => 'required',
+				'list'=> 'required|array',
+				'list.*.reference_number' => 'required',
+				'list.*.serial_number' => 'required',
+				'list.*.entry_box_number' => 'required',
+				'list.*.receiving_box_number' => 'required',
 			], [
-				'data.*.reference_number.required' => 'Please fill the reference_number field.',
-				'data.*.serial_number.required' => 'Please fill the serial_number field.',
-				'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
-				'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
+				'list.*.reference_number.required' => 'Please fill the reference_number field.',
+				'list.*.serial_number.required' => 'Please fill the serial_number field.',
+				'list.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
+				'list.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
 			]);
 
 			if ($validator->fails()) {
