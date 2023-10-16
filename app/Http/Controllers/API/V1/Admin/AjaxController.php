@@ -1341,7 +1341,9 @@ class AjaxController extends Controller
 
             try {
 
-                $dlStock = model('DlStock')::find($req->id);
+                $dlStock = model('DlStock')::where('id', $req->id)->first();
+
+                info($dlStock);
 
                 $dlStock->update([
                     'reference_number' => $req->reference_number,
@@ -1667,46 +1669,45 @@ class AjaxController extends Controller
 
 		} elseif($name=="multiple_dl_stock_store"){
 
-			// $validator = Validator::make($req->all(), [
-			// 	'data'=> 'required|array',
-			// 	'data.*.reference_number' => 'required',
-			// 	'data.*.serial_number' => 'required',
-			// 	'data.*.entry_box_number' => 'required',
-			// 	'data.*.receiving_box_number' => 'required',
-			// ], [
-			// 	'data.*.reference_number.required' => 'Please fill the reference_number field.',
-			// 	'data.*.serial_number.required' => 'Please fill the serial_number field.',
-			// 	'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
-			// 	'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
-			// ]);
+			$validator = Validator::make($req->all(), [
+				'data'=> 'required|array',
+				'data.*.reference_number' => 'required',
+				'data.*.serial_number' => 'required',
+				'data.*.entry_box_number' => 'required',
+				'data.*.receiving_box_number' => 'required',
+			], [
+				'data.*.reference_number.required' => 'Please fill the reference_number field.',
+				'data.*.serial_number.required' => 'Please fill the serial_number field.',
+				'data.*.entry_box_number.required' => 'Please fill the entry_box_number field.',
+				'data.*.receiving_box_number.required' => 'Please fill the receiving_box_number field.',
+			]);
 
-			// if ($validator->fails()) {
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'validation error',
-            //         'errors' => $validator->errors()
-            //     ], 422);
-            // }
+			if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-            \App\Jobs\DlStoreJob::dispatch($req->list, $user->id);
+            // \App\Jobs\DlStoreJob::dispatch($req->list, $user->id);
 
-			// foreach($req->list as $item){
+			foreach($req->list as $item){
 
-            //     if ($item) {
-            //         model('DlStock')::create([
-            //             'reference_number' => $item['reference_number'] ? $item['reference_number'] : NULL,
-            //             'serial_number' => $item['serial_number'] ? $item['serial_number'] : NULL,
-            //             'entry_box_number' => $item['entry_box_number'] ? $item['entry_box_number'] : NULL,
-            //             'receiving_box_number' => $item['receiving_box_number'] ? $item['receiving_box_number'] : NULL,
-            //             'receive_date' => $item['receive_date'] ? new Carbon($item['receive_date']) : NULL,
-            //             // 'delivery_date' => new Carbon($item['delivery_date']),
-            //             'delivery_date' => $item['delivery_date'] ? $item['delivery_date'] : NULL,
-            //             'comment' => $item['comment'] ? $item['comment'] : NULL,
-            //             'creator_id' => $user->id,
-            //             'created_at' => Carbon::now(),
-            //         ]);
-            //     }
-			// }
+                if ($item) {
+                    model('DlStock')::create([
+                        'reference_number' => $item['reference_number'] ? $item['reference_number'] : NULL,
+                        'serial_number' => $item['serial_number'] ? $item['serial_number'] : NULL,
+                        'entry_box_number' => $item['entry_box_number'] ? $item['entry_box_number'] : NULL,
+                        'receiving_box_number' => $item['receiving_box_number'] ? $item['receiving_box_number'] : NULL,
+                        'receive_date' => $item['receive_date'] ? new Carbon($item['receive_date']) : NULL,
+                        'delivery_date' => $item['delivery_date'] ? new Carbon($item['delivery_date']) : NULL,
+                        'comment' => $item['comment'] ? $item['comment'] : NULL,
+                        'creator_id' => $user->id,
+                        'created_at' => Carbon::now(),
+                    ]);
+                }
+			}
 
             return response()->json([
                 'success' => true,

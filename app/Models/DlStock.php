@@ -11,6 +11,10 @@ class DlStock extends Model{
 
     protected $table = 'dl_stocks';
 
+    protected $primaryKey = NULL; // or null
+
+    public $incrementing = false;
+
     protected $fillable = [
         'id',
         'reference_number',
