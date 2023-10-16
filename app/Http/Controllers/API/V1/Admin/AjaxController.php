@@ -1466,7 +1466,62 @@ class AjaxController extends Controller
 
             try {
 
-                $dlStock = model('DlStock')::find($req->id);
+                // $dlStock = model('DlStock')::find($req->id);
+                $dlStock = model('DlStock')::where([
+                    'entry_box_number' => $req->entry_box_number,
+                    'reference_number' => $req->reference_number,
+                    'serial_number' => $req->serial_number,
+                ])->first();
+
+                if (!$dlStock) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data Not Found!'
+                    ], 422);
+                }
+
+                $dlStock->update([
+                    'delivery_date' => $dlStock->delivery_date ? NULL : Carbon::now(),
+                    'comment' => $req->comment,
+                    'delivered_id' => $dlStock->delivery_date ? NULL : $user->id,
+                ]);
+
+                $message = '';
+
+                if ($dlStock->delivery_date) {
+                    $message = 'Data delivered successfully';
+                } else {
+                    $message = 'Data undelivered successfully';
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data'  => $dlStock
+                ], 200);
+
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $th->getMessage()
+                ], 500);
+            }
+        } else if ($name == 'update_all_reference_number_hiphen_to_slash_dl_stock_data') {
+
+            try {
+
+                $dlStock = model('DlStock')::where([
+                    'entry_box_number' => $req->entry_box_number,
+                    'reference_number' => $req->reference_number,
+                    'serial_number' => $req->serial_number,
+                ])->first();
+
+                if (!$dlStock) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data Not Found!'
+                    ], 422);
+                }
 
                 $dlStock->update([
                     'delivery_date' => $dlStock->delivery_date ? NULL : Carbon::now(),

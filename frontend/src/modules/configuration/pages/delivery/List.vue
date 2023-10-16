@@ -370,6 +370,8 @@ export default {
       if (result.success) {
         this.$toast.success({ title: 'Success', message: result.message })
         this.loadData()
+      } else {
+        this.$toast.error({ title: 'Success', message: result.message })
       }
       this.loading = false
     },
