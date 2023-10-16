@@ -1696,6 +1696,7 @@ class AjaxController extends Controller
 
                 if ($item) {
                     model('DlStock')::create([
+                        'id' => random_int((int) 1000000000000, (int) 99999999999999999999),
                         'reference_number' => $item['reference_number'] ? $item['reference_number'] : NULL,
                         'serial_number' => $item['serial_number'] ? $item['serial_number'] : NULL,
                         'entry_box_number' => $item['entry_box_number'] ? $item['entry_box_number'] : NULL,
