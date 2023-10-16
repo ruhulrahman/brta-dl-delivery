@@ -53,7 +53,7 @@
                                                 <div class="dropzone-custom-content">
                                                     <h1 class="dropzone-custom-title text-primary"><i class="ri-upload-2-line"></i></h1>
                                                     <h1 class="dropzone-custom-title text-primary">Click to upload.</h1>
-                                                    <h2 class="dropzone-custom-title text-danger">Maximum 1000 rows</h2>
+                                                    <h2 class="dropzone-custom-title text-danger">Maximum 150 rows</h2>
                                                 </div>
                                             </vue-dropzone>
                                       </b-col>
