@@ -1485,7 +1485,7 @@ class AjaxController extends Controller
                 $dlStock->update([
                     'delivery_date' => $dlStock->delivery_date ? NULL : Carbon::now(),
                     'comment' => $req->comment,
-                    'delivered_id' => $dlStock->delivery_date ? NULL : $user->id,
+                    'delivered_id' => $user->id,
                 ]);
 
                 $message = '';
