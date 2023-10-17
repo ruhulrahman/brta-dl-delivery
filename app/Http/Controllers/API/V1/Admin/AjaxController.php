@@ -1468,12 +1468,12 @@ class AjaxController extends Controller
 
             try {
 
-                // $dlStock = model('DlStock')::find($req->id);
-                $dlStock = model('DlStock')::where([
-                    'entry_box_number' => $req->entry_box_number,
-                    'reference_number' => $req->reference_number,
-                    'serial_number' => $req->serial_number,
-                ])->first();
+                $dlStock = model('DlStock')::where('id', $req->id)->first();
+                // $dlStock = model('DlStock')::where([
+                //     'entry_box_number' => $req->entry_box_number,
+                //     'reference_number' => $req->reference_number,
+                //     'serial_number' => $req->serial_number,
+                // ])->first();
 
                 if (!$dlStock) {
                     return response()->json([
