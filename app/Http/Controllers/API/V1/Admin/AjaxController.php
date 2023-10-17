@@ -1454,26 +1454,26 @@ class AjaxController extends Controller
             }
         } else if ($name == 'deliver_and_undeliver_dl_stock_data') {
 
-            $validate = Validator::make($request->all(), [
-                'id' => 'required',
-            ]);
+            // $validate = Validator::make($request->all(), [
+            //     'id' => 'required',
+            // ]);
 
-            if ($validate->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validate->errors()
-                ], 422);
-            }
+            // if ($validate->fails()) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'validation error',
+            //         'errors' => $validate->errors()
+            //     ], 422);
+            // }
 
             try {
 
-                $dlStock = model('DlStock')::where('id', $req->id)->first();
-                // $dlStock = model('DlStock')::where([
-                //     'entry_box_number' => $req->entry_box_number,
-                //     'reference_number' => $req->reference_number,
-                //     'serial_number' => $req->serial_number,
-                // ])->first();
+                // $dlStock = model('DlStock')::where('id', $req->id)->first();
+                $dlStock = model('DlStock')::where([
+                    'entry_box_number' => $req->entry_box_number,
+                    'reference_number' => $req->reference_number,
+                    'serial_number' => $req->serial_number,
+                ])->first();
 
                 if (!$dlStock) {
                     return response()->json([
