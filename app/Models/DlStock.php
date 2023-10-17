@@ -11,7 +11,8 @@ class DlStock extends Model{
 
     protected $table = 'dl_stocks';
 
-    protected $primaryKey = NULL; // or null
+    // protected $primaryKey = NULL; // or null
+    protected $primaryKey = 'id';
 
     public $incrementing = false;
 
